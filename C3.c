@@ -29,159 +29,30 @@ User users[MAX_USERS] = {
 Disciplina materia[MAX_USERS][MAX_DISCIPLINES];
 float nota[MAX_USERS][MAX_NOTES][MAX_DISCIPLINES];
 int currentUser = -1; // -1 indica que nenhum usuario esta logado
-char login[50], senha[50];
-int n, i, m, r, h, verifadm;
-char ver_media[25];
+int verifadm;
 
 //Prototipos...
-int loginVerif(char *email, char *password); // função que verifica se o usuario digitado consta no banco de dados
 void enter(); // apenas para o usuario ter tempo de ler
-void preListMat(); // determina quantas materias listar
-char* verMedia(); // determina se o usuario ta aprovado ou reprovado
-void listMat(); // lista as materias 
-void regMat(); // recebe os valores para registrar na materia
-int containsAtSymbol(char *string); // verifica se o email digitado contem o caracter '@'
-void cadNota(); // cadastra nota digitada pelo usuario
-void matInsert(); // insere materias
-void menuPrincipal(); // nome autoexplicativo
-void cadUser(int g); // cadastro de usuarios
-void adminMenu(); // nome autoexplicativo
 void loginRequest(); // pede o login ou cadastro para o usuario
-int hasMateria(); // verifica se o usuario atual contem alguma materia cadastrada
+void cadUser(int g); // cadastro de usuarios
+int loginVerif(char *email, char *password); // função que verifica se o usuario digitado consta no banco de dados
+int containsAtSymbol(char *string); // verifica se o email digitado contem o caracter '@'
 int checkEmail(char *string); // verifica se o email digitado ja foi cadastrado
-
-int loginVerif(char *email, char *password){
-    const char login_adm[] = "admin";
-    const char senha_adm[] = "admin123";
-    for (i = 0; i < MAX_USERS; i++)
-    {
-        if (strcmp(users[i].email, email) == 0 && strcmp(users[i].password, password) == 0)
-        {
-            currentUser = i; // Defina o usuario atual após o login bem-sucedido
-            return 1;        // Retorna 1 se o login for bem-sucedido
-        }
-    }
-    if (strcmp(email, login_adm) == 0 && strcmp(password, senha_adm) == 0) {
-        verifadm = 1;
-        currentUser = MAX_USERS + 1;
-        return 1;
-    }
-    return 0; // Retorna 0 se o login falhar
-} // funcao de verificacao de login basico
+int hasMateria(); // verifica se o usuario atual contem alguma materia cadastrada
+void matInsert(); // insere materias
+void regMat(int i); // recebe os valores para registrar na materia
+void menuPrincipal(); // nome autoexplicativo
+void preListMat(); // determina quantas materias listar
+void listMat(int atualMat); // lista as materias 
+void cadNota(int atualMat); // cadastra nota digitada pelo usuario
+char* verMedia(int atualMat); // determina se o usuario ta aprovado ou reprovado
+void adminMenu(); // nome autoexplicativo
 
 void enter(){
     printf("\nAperte 'ENTER' para continuar\n");
     while (getchar() != '\n');      // Limpa o buffer, consumindo o '\n' anterior (se houver)
     getchar(); // Aguarda o usuario pressionar ENTER
     system("cls");
-}
-
-void preListMat(){
-    do{
-        system("cls");
-        listMat();
-        printf("Selecione uma opcao \n");
-        printf("[1] para inserir notas\n");
-        printf("[2] para sair\n");
-        scanf("%d", &h);
-        switch (h){
-        case 1:
-            cadNota();
-            break;
-        case 2:
-            enter();
-            break;
-        default:
-            printf("Dado invalido!\n");
-            enter();
-            break;
-        }
-    } while (h != 2);
-}
-
-char* verMedia() {
-    float currentMedia = materia[currentUser][r].media;
-
-    if (currentMedia >= 7) {
-        return "Aprovado!";
-    }
-    else if (currentMedia < 5) {
-        return "Reprovado!";
-    }
-    else {
-        printf("Em Exame!\n");
-        if (materia[currentUser][r].notaex == 0) {
-            printf("Digite a nota do exame: ");
-            scanf("%f", &materia[currentUser][r].notaex);
-            currentMedia = (currentMedia + materia[currentUser][r].notaex) / 2;
-        } else {
-            printf("Nota do exame: %f\n", materia[currentUser][r].notaex);
-        }
-
-        return (currentMedia >= 5) ? "Aprovado!!" : "Reprovado!!";
-    }
-}
-
-void listMat() {
-    printf("Nome: %s\n", materia[currentUser][r].nome);
-    printf("Professor: %s\n", materia[currentUser][r].prof);
-    printf("Horas totais: %.2f\n", materia[currentUser][r].hora_t);
-    printf("Horas ministradas: %.2f\n", materia[currentUser][r].hora_c);
-    materia[currentUser][r].porc_hora = (materia[currentUser][r].hora_c / materia[currentUser][r].hora_t) * 100;
-    printf("Porcentagem de aulas ministradas: %.2f%%\n", materia[currentUser][r].porc_hora);
-    printf("Media da disciplina: %.2f\n", materia[currentUser][r].media);
-    if (nota[currentUser][0][r] && nota[currentUser][1][r] && nota[currentUser][2][r]) {
-        printf("Voce esta %s\n", verMedia());
-    }
-}
-
-void regMat() {
-    printf("---------------------------------------\n");
-    printf("--------Registro de disciplinas--------\n");
-    printf("---------------------------------------\n");
-    printf("---N da materia a ser registrada: %d---\n", i + 1);
-    printf("---------------------------------------\n");
-    printf("Digite o nome da disciplina n %d: ", i + 1);
-    scanf(" %99[^\n]", materia[currentUser][i].nome); // Lê ateh 99 caracteres ou ateh encontrar uma nova linha.
-    printf("Digite o nome do Professor: ");
-    scanf(" %99[^\n]", materia[currentUser][i].prof); // Mesmo procedimento para o nome do professor.
-    printf("Digite a quantidade de aulas totais da disciplina: ");
-    scanf("%f", &materia[currentUser][i].hora_t);
-    materia[currentUser][i].hora_t = (materia[currentUser][i].hora_t * 5) / 6;
-    printf("Digite a quantidade de aulas ja realizadas da disciplina: ");
-    scanf("%f", &materia[currentUser][i].hora_c);
-    materia[currentUser][i].hora_c = (materia[currentUser][i].hora_c * 5) / 6;
-    printf("Disciplina cadastrada com sucesso!\n");
-    enter();
-}
-
-void cadNota() {
-    int l = 0;
-
-    do {
-        system("cls"); // limpatela
-        for (i = 0; i < MAX_NOTES; i++) {
-            printf("Nota %d: %.1f\n", i + 1, nota[currentUser][i][r]);
-        }
-
-        printf("Deseja inserir qual nota? \n");
-        printf("Digite [4] para sair\n");
-        scanf("%d", &l);
-        if (l >= 1 && l < 4) {
-            printf("Digite a nota %d: ", l);
-            scanf("%f", &nota[currentUser][l - 1][r]); // Os índices em C comecam em 0
-            printf("Nota inserida: %.1f\n", nota[currentUser][l - 1][r]);
-            materia[currentUser][r].media = (nota[currentUser][0][r] + nota[currentUser][1][r] + nota[currentUser][2][r]) / 3;
-            printf("Media: %.1f\n", materia[currentUser][r].media);
-            enter();
-        } else if (l == 4) {
-            enter();
-            break;
-        } else {
-            printf("Opcao Invalida!\n");
-            enter();
-        }
-    } while (l != 4);
 }
 
 void loginRequest() {
@@ -229,17 +100,6 @@ void loginRequest() {
     }
 }
 
-int checkEmail(char *string) {
-    for (i = 0; i < MAX_USERS; i++) {
-        if (strcmp(string,users[i].email)) {
-            return 1; //retorna 1 quando os emails forem iguais
-            break; //caso seja igual, para o for
-        } else {
-            return 0; //retorna 0 se nao encontrar um email igual
-        }
-    }
-}
-
 void cadUser(int g) {
     char inputEmail[85];
     char inputPass[85];
@@ -264,48 +124,41 @@ void cadUser(int g) {
     enter();
 }
 
-void adminMenu() {
-    printf("Codigo de administrador encontrado\n");
-    do {
-        printf("Deseja inserir novo usuario ou modificar algum? \n");
-        printf("[1] Sim\n");
-        printf("[0] Nao\n");
-        scanf("%d", &m);
-        switch (m) {
-        case 1:
-            for (i = 0; i < MAX_USERS; i++)
-            {
-                printf("Usuario %d: %s\n", i + 1, users[i].email);
-            }
-            printf("Otimo! Qual usuario deseja inserir ou modificar?\n");
-            scanf("%d", &r);
-            printf("O email do Usuario registrado eh: %s\n", users[r-1].email);
-            cadUser(r - 1);
-            printf("Usuario atualizado com sucesso!\n");
-            printf("email do Usuario: %s\n", users[r-1].email);
-            printf("A senha eh %s\n", users[r-1].password);
-            enter();
-            system("cls");  // limpatela
-            break;
-
-        case 0:
-            break;
-
-        default:
-            printf("Opcao invalida!\n");
-            enter();
-            break;
+int loginVerif(char *email, char *password){
+    const char login_adm[] = "admin";
+    const char senha_adm[] = "admin123";
+    for (int i = 0; i < MAX_USERS; i++)
+    {
+        if (strcmp(users[i].email, email) == 0 && strcmp(users[i].password, password) == 0)
+        {
+            currentUser = i; // Defina o usuario atual após o login bem-sucedido
+            return 1;        // Retorna 1 se o login for bem-sucedido
         }
-    } while (m != 0);
-}
+    }
+    if (strcmp(email, login_adm) == 0 && strcmp(password, senha_adm) == 0) {
+        verifadm = 1;
+        currentUser = MAX_USERS + 1;
+        return 1;
+    }
+    return 0; // Retorna 0 se o login falhar
+} // funcao de verificacao de login basico
 
 int containsAtSymbol(char *string) {
     return strchr(string, '@') != NULL;  
     // Retorna 1 (verdadeiro) se '@' estiver na string, caso contrario retorna 0 (falso)
 }
 
+int checkEmail(char *string) {
+    for (int i = 0; i < MAX_USERS; i++) {
+        if (strcmp(string,users[i].email)) {
+            return 1; //retorna 1 quando os emails forem iguais
+        } 
+    }
+    return 0; //retorna 0 se nao encontrar um email igual
+}
+
 int hasMateria() {
-    for (i = 0; i < MAX_DISCIPLINES; i++) {
+    for (int i = 0; i < MAX_DISCIPLINES; i++) {
         if (strlen(materia[currentUser][i].nome) > 0) {
             return 1;  // Retorna 1 se encontrar alguma materia
         }
@@ -313,7 +166,8 @@ int hasMateria() {
     return 0;  // Retorna 0 se nao encontrar nenhuma materia
 }
 
-void matInsert() {      
+void matInsert() {     
+    int h;
     do {
         printf("Deseja inserir quantas disciplinas? (Max: 6)\n");
         scanf("%d", &h);
@@ -322,17 +176,38 @@ void matInsert() {
             }
         system("cls");
     } while (h < 1 || h > MAX_DISCIPLINES);
-    for (i = 0; i < h; i++) {
-        regMat();
+    for (int i = 0; i < h; i++) {
+        regMat(i);
     }
+}
+
+void regMat(int i) {
+    printf("---------------------------------------\n");
+    printf("--------Registro de disciplinas--------\n");
+    printf("---------------------------------------\n");
+    printf("---N da materia a ser registrada: %d---\n", i + 1);
+    printf("---------------------------------------\n");
+    printf("Digite o nome da disciplina n %d: ", i + 1);
+    scanf(" %99[^\n]", materia[currentUser][i].nome); // Lê ateh 99 caracteres ou ateh encontrar uma nova linha.
+    printf("Digite o nome do Professor: ");
+    scanf(" %99[^\n]", materia[currentUser][i].prof); // Mesmo procedimento para o nome do professor.
+    printf("Digite a quantidade de aulas totais da disciplina: ");
+    scanf("%f", &materia[currentUser][i].hora_t);
+    materia[currentUser][i].hora_t = (materia[currentUser][i].hora_t * 5) / 6;
+    printf("Digite a quantidade de aulas ja realizadas da disciplina: ");
+    scanf("%f", &materia[currentUser][i].hora_c);
+    materia[currentUser][i].hora_c = (materia[currentUser][i].hora_c * 5) / 6;
+    printf("Disciplina cadastrada com sucesso!\n");
+    enter();
 }
 
 void menuPrincipal() {
     const int EXIT_CODE = 14323;  // Usando uma constante em vez de um numero magico
-    m = 0;
+    int m = 0;
+    int r;
     while (m != EXIT_CODE) {
         printf("Lista de materias cadastradas: \n");
-        for (i = 0; i < 6; i++) {
+        for (int i = 0; i < 6; i++) {
             printf("%d - %s\n", i + 1, materia[currentUser][i].nome);
         }
         printf("Digite o numero da materia para obter mais detalhes.\n");
@@ -345,7 +220,7 @@ void menuPrincipal() {
         scanf("%d", &r);
         if (r >= 1 && r <= 6) {
             r = r - 1;  // Ajuste do índice
-            preListMat();
+            preListMat(r);
         } else {
             switch (r) {
                 case 6373:
@@ -362,10 +237,10 @@ void menuPrincipal() {
 
                 case 8:
                     printf("Digite qual materia deseja inserir ou modificar: \n");
-                    scanf("%d", &i);
-                    i--;
+                    scanf("%d", &r);
+                    r--;
                     system("cls");
-                    regMat();
+                    regMat(r);
                     break;
 
                 case 7:
@@ -383,6 +258,156 @@ void menuPrincipal() {
             }
         }
     }
+}
+
+void preListMat(int atualMat){
+    int h;
+    do{
+        system("cls");
+        listMat(atualMat);
+        printf("Selecione uma opcao \n");
+        printf("[1] para inserir notas\n");
+        printf("[2] para sair\n");
+        scanf("%d", &h);
+        switch (h){
+        case 1:
+            cadNota(atualMat);
+            break;
+        case 2:
+            enter();
+            break;
+        default:
+            printf("Dado invalido!\n");
+            enter();
+            break;
+        }
+    } while (h != 2);  
+}
+
+void listMat(int atualMat) {
+    printf("Nome: %s\n", materia[currentUser][atualMat].nome);
+    printf("Professor: %s\n", materia[currentUser][atualMat].prof);
+    printf("Horas totais: %.2f\n", materia[currentUser][atualMat].hora_t);
+    printf("Horas ministradas: %.2f\n", materia[currentUser][atualMat].hora_c);
+    materia[currentUser][atualMat].porc_hora = (materia[currentUser][atualMat].hora_c / materia[currentUser][atualMat].hora_t) * 100;
+    printf("Porcentagem de aulas ministradas: %.2f%%\n", materia[currentUser][atualMat].porc_hora);
+    printf("Media da disciplina: %.2f\n", materia[currentUser][atualMat].media);
+    if (nota[currentUser][0][atualMat] && nota[currentUser][1][atualMat] && nota[currentUser][2][atualMat]) {
+        printf("Voce esta %s\n", verMedia(atualMat));
+    }
+}
+
+void cadNota(int atualMat) {
+    int l = 0;
+    do {
+        system("cls"); // limpatela
+        for (int i = 0; i < MAX_NOTES; i++) {
+            printf("Nota %d: %.1f\n", i + 1, nota[currentUser][i][atualMat]);
+        }
+        printf("Deseja inserir qual nota? \n");
+        printf("Digite [4] para sair\n");
+        scanf("%d", &l);
+        if (l >= 1 && l < 4) {
+            printf("Digite a nota %d: ", l);
+            scanf("%f", &nota[currentUser][l - 1][atualMat]); // Os índices em C comecam em 0
+            printf("Nota inserida: %.1f\n", nota[currentUser][l - 1][atualMat]);
+            materia[currentUser][atualMat].media = (nota[currentUser][0][atualMat] + nota[currentUser][1][atualMat] + nota[currentUser][2][atualMat]) / 3;
+            printf("Media: %.1f\n", materia[currentUser][atualMat].media);
+            enter();
+        } else if (l == 4) {
+            enter();
+            break;
+        } else {
+            printf("Opcao Invalida!\n");
+            enter();
+        }
+    } while (l != 4);
+}
+
+char* verMedia(int atualMat) {
+    float currentMedia = materia[currentUser][atualMat].media;
+    if (currentMedia >= 7) {
+        return "Aprovado!";
+    }
+    else if (currentMedia < 5) {
+        return "Reprovado!";
+    }
+    else {
+        printf("Em Exame!\n");
+        if (materia[currentUser][atualMat].notaex == 0) {
+            printf("Digite a nota do exame: ");
+            scanf("%f", &materia[currentUser][atualMat].notaex);
+            currentMedia = (currentMedia + materia[currentUser][atualMat].notaex) / 2;
+        } else {
+            printf("Nota do exame: %f\n", materia[currentUser][atualMat].notaex);
+        }
+
+        return (currentMedia >= 5) ? "Aprovado!!" : "Reprovado!!";
+    }
+}
+
+void adminMenu() {
+    int escolhaMenu;
+    int escolhaUser; 
+    int confirmacao;
+    const char nulo[] = "";
+    printf("Codigo de administrador encontrado\n");
+    do {
+        printf("O que deseja?\n");
+        printf("[1] Cadastrar usuario.\n");
+        printf("[2] Excluir usuario.\n");
+        printf("[0] Sair\n");
+        scanf("%d", &escolhaMenu);
+        switch (escolhaMenu) {
+        case 1:
+            for (int i = 0; i < MAX_USERS; i++)
+            {
+                printf("Usuario %d: %s\n", i + 1, users[i].email);
+            }
+            printf("Otimo! Qual usuario deseja inserir ou modificar?\n");
+            scanf("%d", &escolhaUser);
+            printf("O email do Usuario registrado eh: %s\n", users[escolhaUser-1].email);
+            cadUser(escolhaUser - 1);
+            printf("Usuario atualizado com sucesso!\n");
+            printf("email do Usuario: %s\n", users[escolhaUser - 1].email);
+            printf("A senha eh %s\n", users[escolhaUser - 1].password);
+            enter();
+            system("cls");  // limpatela
+            break;
+
+        case 2:
+            for (int i = 0; i < MAX_USERS; i++)
+            {
+                printf("Usuario %d: %s\n", i + 1, users[i].email);
+            }
+            printf("Otimo! Qual usuario deseja excluir?\n");
+            scanf("%d", &escolhaUser);
+            printf("Certeza que deseja excluir o usuario %d? \ndigite o numero novamente para confirmar: ",escolhaUser);
+            scanf("%d", &confirmacao);
+            if(escolhaUser==confirmacao){
+                printf("Deletando o usuario %d, de email: %s\n",escolhaUser,users[escolhaUser - 1].email);
+                strcpy(users[escolhaUser - 1].email,nulo);
+                strcpy(users[escolhaUser - 1].password,nulo);
+                printf("Deletado com sucesso!\n");
+                enter();
+                adminMenu();
+            } 
+            else{
+                printf("A confirmacao difere do numero escolhido, voltando ao menu principal\n");
+                enter();
+                adminMenu();
+            }
+            break;
+
+        case 0:
+            break;
+
+        default:
+            printf("Opcao invalida!\n");
+            enter();
+            break;
+        }
+    } while (escolhaMenu != 0);
 }
 
 int main() {
