@@ -20,20 +20,26 @@ struct user{
     struct disciplina *materia;
 };
 
+typedef struct user User;
+typedef struct disciplina Disciplina;
 
-
+User *alocarUser(int quant);
+void testar();
+void alocarMateria(User *users, int quant);
 void enter(); // apenas para o usuario ter tempo de ler
-void loginRequest(); // pede o login ou cadastro para o usuario
-void cadUser(int g); // cadastro de usuarios
-int loginVerif(char *email, char *password); // função que verifica se o usuario digitado consta no banco de dados
+void loginRequest(User *users, int *currentUser, int *verifadm); // pede o login ou cadastro para o usuario
+void cadUser(User *users, int currentUser, int atual); // cadastro de usuarios
+int loginVerif(User *users, char *email, char *password, int *currentUser, int *verifadm); // função que verifica se o usuario digitado consta no banco de dados
 int containsAtSymbol(char *string); // verifica se o email digitado contem o caracter '@'
-void adminMenu(); // nome autoexplicativo
-int checkEmail(char *string); // verifica se o email digitado ja foi cadastrado
-int hasMateria(); // verifica se o usuario atual contem alguma materia cadastrada
-void matInsert(); // insere materias
-void regMat(int i); // recebe os valores para registrar na materia
-void menuPrincipal(); // nome autoexplicativo
-void preListMat(); // determina quantas materias listar
-void listMat(int atualMat); // lista as materias 
-void cadNota(int atualMat); // cadastra nota digitada pelo usuario
-char* verMedia(int atualMat); // determina se o usuario ta aprovado ou reprovado
+int checkEmail(User *users, char *string); // verifica se o email digitado ja foi cadastrado
+int hasMateria(User *users, int currentUser); // verifica se o usuario atual contem alguma materia cadastrada
+void matInsert(User *users, int currentUser); // insere materias
+void regMat(User *users, int currentUser, int i); // recebe os valores para registrar na materia
+void menuPrincipal(User *users, int currentUser, int verifadm); // nome autoexplicativo
+void preListMat(User *users, int currentUser, int atualMat); // determina quantas materias listar
+void listMat(User *users, int currentUser, int atualMat); // lista as materias 
+void cadNota(User *users, int currentUser, int atualMat); // cadastra nota digitada pelo usuario
+char* verMedia(User *users, int currentUser, int atualMat); // determina se o usuario ta aprovado ou reprovado
+void adminMenu(User *users, int currentUser); // nome autoexplicativo
+void criarUsers(User *users); // Cria os usuarios
+void liberarMateria(User *users);
