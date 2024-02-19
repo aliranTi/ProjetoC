@@ -1,4 +1,3 @@
-
 #include "libprojeto.h"
 
 User * alocarUser(int quant){
@@ -172,27 +171,27 @@ void matInsert(User *users, int *currentUser) {
 
     
     for (int i = 0; i < h; i++) {
-        regMat(users, currentUser, i);
+        regMat(&users[*currentUser].materia[i],i);
     }
 }
 
 
-void regMat(User *users, int *currentUser, int i) {
+void regMat(Disciplina * disciplina,int i) {
     printf("---------------------------------------\n");
     printf("--------Registro de disciplinas--------\n");
     printf("---------------------------------------\n");
     printf("---N da matéria a ser registrada: %d---\n", i + 1);
     printf("---------------------------------------\n");
     printf("Digite o nome da disciplina n %d: ", i + 1);
-    scanf(" %99[^\n]", users[*currentUser].materia[i].nome); // Lê até 99 caracteres ou até encontrar uma nova linha.
+    scanf(" %99[^\n]", disciplina->nome); // Lê até 99 caracteres ou até encontrar uma nova linha.
     printf("Digite o nome do Professor: ");
-    scanf(" %99[^\n]", users[*currentUser].materia[i].prof); // Mesmo procedimento para o nome do professor.
+    scanf(" %99[^\n]", disciplina->prof); // Mesmo procedimento para o nome do professor.
     printf("Digite a quantidade de aulas totais da disciplina: ");
-    scanf("%f", &users[*currentUser].materia[i].hora_t);
-    users[*currentUser].materia[i].hora_t = (users[*currentUser].materia[i].hora_t * 5) / 6;
+    scanf("%f", &disciplina->hora_t);
+    disciplina->hora_t = (disciplina->hora_t * 5) / 6;
     printf("Digite a quantidade de aulas já realizadas da disciplina: ");
-    scanf("%f", &users[*currentUser].materia[i].hora_c);
-    users[*currentUser].materia[i].hora_c = (users[*currentUser].materia[i].hora_c * 5) / 6;
+    scanf("%f", &disciplina->hora_c);
+    disciplina->hora_c = (disciplina->hora_c * 5) / 6;
     printf("Disciplina cadastrada com sucesso!\n");
     enter();
 }
@@ -239,7 +238,7 @@ void menuPrincipal(User *users, int *currentUser, int *verifadm) {
                     scanf("%d", &r);
                     r--;
                     system("cls");
-                    regMat(users, currentUser, r);
+                    regMat(&users[*currentUser].materia[r],r);
                     break;
                 case 7:
                     printf("Fazendo logoff...\n");

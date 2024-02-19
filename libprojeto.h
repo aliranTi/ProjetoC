@@ -34,7 +34,7 @@ int containsAtSymbol(char *string); // verifica se o email digitado contem o car
 int checkEmail(User *users, char *string); // verifica se o email digitado ja foi cadastrado
 int hasMateria(User *users, int *currentUser); // verifica se o usuario atual contem alguma materia cadastrada
 void matInsert(User *users, int *currentUser); // insere materias
-void regMat(User *users, int *currentUser, int i); // recebe os valores para registrar na materia
+void regMat(Disciplina * disciplina,int i); // recebe os valores para registrar na materia
 void menuPrincipal(User *users, int *currentUser, int *verifadm); // nome autoexplicativo
 void preListMat(User *users, int *currentUser, int *atualMat); // determina quantas materias listar
 void listMat(User *users, int *currentUser, int *atualMat); // lista as materias 
