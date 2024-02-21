@@ -107,6 +107,11 @@ void cadUser(User *users, int atual) {
     enter(); // Adicionado para limpar o buffer após a entrada de dados
 }
 
+void cadUserFile(User * users){
+    FILE * arquivo = fopen("UserDB.b","ab");
+    fwrite(users,sizeof(User),1,arquivo);
+}
+
 int loginVerif(User *users, char *email, char *password, int *currentUser, int *verifadm) {
     const char login_adm[] = "admin";
     const char senha_adm[] = "admin123";
@@ -425,7 +430,7 @@ void adminMenu(User *users) {
     } while (escolhaMenu != 0);
 }
 
-void criarUsers(User *users) {
+/*void criarUsers(User *users) {
     char senha[80], email[80];
     for (int i = 0; i < MAX_USERS; i++) {
         snprintf(email, sizeof(email), "user%d@mail.com", i + 1);
@@ -433,6 +438,24 @@ void criarUsers(User *users) {
         strcpy(users[i].email, email);
         strcpy(users[i].password, senha);
     }
+}*/
+
+User * recuperarUsers(User * users){
+    FILE * arquivo = fopen("UserDB.b","rb");
+    if (arquivo == NULL) {
+        printf("Erro ao abrir o arquivo UserDB.b\nContate o administrador!\n");
+        return NULL;
+    }
+    User userAtual;
+    int quant=0;
+    while (fread(&userAtual,sizeof(User),1,arquivo)) {
+        quant++;
+    }
+    users = alocarUser(quant);
+    rewind(arquivo);
+    fread(users,sizeof(User),quant,arquivo);
+    fclose(arquivo);
+    return users;
 }
 
 void imprimirMateria(User *users, int *currentUser, int *atualMat){
