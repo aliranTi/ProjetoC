@@ -57,7 +57,7 @@ void loginRequest(User *users, int *currentUser, int *verifadm) {
 
         case 2:
             if (atual <= MAX_USERS) {
-                cadUser(users, currentUser, *atualp);
+                cadUser(users, *atualp);
                 atual++;
                 loginRequest(users, currentUser, verifadm);
             } else {
@@ -77,7 +77,7 @@ void testar(){
     printf("test\n");
 }
 
-void cadUser(User *users, int *currentUser, int atual) { 
+void cadUser(User *users, int atual) { 
     char inputEmail[85];
     char inputPass[85];
     int cademail = 0;
@@ -225,7 +225,7 @@ void menuPrincipal(User *users, int *currentUser, int *verifadm) {
             switch (r) {
                 case 6373:
                     system("cls");
-                    adminMenu(users,currentUser);
+                    adminMenu(users);
                     break;
                 case 9:
                     printf("Obrigado por utilizar o Programa!!\n");
@@ -262,7 +262,8 @@ void preListMat(User *users, int *currentUser, int *atualMat) {
         listMat(users, currentUser, atualMat);
         printf("Selecione uma opção \n");
         printf("[1] para inserir notas\n");
-        printf("[2] para sair\n");
+        printf("[2] para Imprimir a materia atual");
+        printf("[3] para sair\n");
         scanf("%d", &h);
 
         switch (h) {
@@ -270,6 +271,9 @@ void preListMat(User *users, int *currentUser, int *atualMat) {
                 cadNota(users, currentUser, atualMat);
                 break;
             case 2:
+                imprimirMateria(users, currentUser, atualMat);
+                break;
+            case 3:
                 enter();
                 break;
             default:
@@ -347,7 +351,7 @@ char* verMedia(User *users, int *currentUser, int *atualMat) {
 }
 
 
-void adminMenu(User *users, int *currentUser) {
+void adminMenu(User *users) {
     int escolhaMenu;
     int escolhaUser;
     int confirmacao;
@@ -376,7 +380,7 @@ void adminMenu(User *users, int *currentUser) {
                 }
 
                 printf("O email do Usuário registrado é: %s\n", users[escolhaUser - 1].email);
-                cadUser(users, currentUser, escolhaUser - 1);
+                cadUser(users, escolhaUser - 1);
                 printf("Usuário atualizado com sucesso!\n");
                 printf("Email do Usuário: %s\n", users[escolhaUser - 1].email);
                 printf("A senha é %s\n", users[escolhaUser - 1].password);
@@ -429,6 +433,28 @@ void criarUsers(User *users) {
         strcpy(users[i].email, email);
         strcpy(users[i].password, senha);
     }
+}
+
+void imprimirMateria(User *users, int *currentUser, int *atualMat){
+    FILE * file = fopen("saida.txt","a");
+    Disciplina materiaAtual = users[*currentUser].materia[*atualMat];
+    fprintf(file,"Nome: %s\n", materiaAtual.nome);
+    fprintf(file,"Professor: %s\n", materiaAtual.prof);
+    fprintf(file,"Horas totais: %.2f\n", materiaAtual.hora_t);
+    fprintf(file,"Horas ministradas: %.2f\n", materiaAtual.hora_c);
+    materiaAtual.porc_hora = (materiaAtual.hora_c / materiaAtual.hora_t) * 100;
+    fprintf(file,"Porcentagem de aulas ministradas: %.2f%%\n", materiaAtual.porc_hora);
+    fprintf(file,"Media da disciplina: %.2f\n", materiaAtual.media);
+    if (materiaAtual.nota[0] && materiaAtual.nota[1] && materiaAtual.nota[2]) {
+        if (materiaAtual.media>=5)
+        {
+            fprintf(file,"Voce esta Aprovado!!");
+        } else {
+            fprintf(file,"Voce esta Reprovado!!");
+        }
+        
+    }
+    fclose(file);
 }
 
 void liberarMateria(User *users){

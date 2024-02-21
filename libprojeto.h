@@ -25,10 +25,11 @@ typedef struct disciplina Disciplina;
 
 User *alocarUser(int quant);
 void testar();
+void imprimirMateria(User *users, int *currentUser, int *atualMat);
 void alocarMateria(User *users, int quant);
 void enter(); // apenas para o usuario ter tempo de ler
 void loginRequest(User *users, int *currentUser, int *verifadm); // pede o login ou cadastro para o usuario
-void cadUser(User *users, int *currentUser, int atual); // cadastro de usuarios
+void cadUser(User *users, int atual); // cadastro de usuarios
 int loginVerif(User *users, char *email, char *password, int *currentUser, int *verifadm); // função que verifica se o usuario digitado consta no banco de dados
 int containsAtSymbol(char *string); // verifica se o email digitado contem o caracter '@'
 int checkEmail(User *users, char *string); // verifica se o email digitado ja foi cadastrado
@@ -40,6 +41,6 @@ void preListMat(User *users, int *currentUser, int *atualMat); // determina quan
 void listMat(User *users, int *currentUser, int *atualMat); // lista as materias 
 void cadNota(User *users, int *currentUser, int *atualMat); // cadastra nota digitada pelo usuario
 char* verMedia(User *users, int *currentUser, int *atualMat); // determina se o usuario ta aprovado ou reprovado
-void adminMenu(User *users, int *currentUser); // nome autoexplicativo
+void adminMenu(User *users); // nome autoexplicativo
 void criarUsers(User *users); // Cria os usuarios
 void liberarMateria(User *users);
