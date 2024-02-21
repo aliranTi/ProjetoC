@@ -440,7 +440,8 @@ void adminMenu(User *users) {
     }
 }*/
 
-User * recuperarUsers(User * users){
+User * recuperarUsers(){
+    User * users;
     FILE * arquivo = fopen("UserDB.b","rb");
     if (arquivo == NULL) {
         printf("Erro ao abrir o arquivo UserDB.b\nContate o administrador!\n");

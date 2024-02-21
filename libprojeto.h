@@ -44,3 +44,5 @@ char* verMedia(User *users, int *currentUser, int *atualMat); // determina se o 
 void adminMenu(User *users); // nome autoexplicativo
 void criarUsers(User *users); // Cria os usuarios
 void liberarMateria(User *users);
+User * recuperarUsers();
+void cadUserFile(User * users);
