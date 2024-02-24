@@ -57,7 +57,7 @@ void loginRequest(User *users, int *currentUser, int *verifadm) {
 
         case 2:
             if (atual <= MAX_USERS) {
-                cadUser(users, *atualp);
+                users[atual] = cadUser(&users[atual], *atualp);
                 atual++;
                 loginRequest(users, currentUser, verifadm);
             } else {
@@ -77,7 +77,7 @@ void testar(){
     printf("test\n");
 }
 
-void cadUser(User *users, int atual) { 
+User cadUser(User *users, int atual) { 
     char inputEmail[85];
     char inputPass[85];
     int cademail = 0;
@@ -86,7 +86,7 @@ void cadUser(User *users, int atual) {
         printf("Digite o email para realizar o cadastro: \n");
         scanf(" %84s", inputEmail); // Ajustado o tamanho máximo para 84 para evitar overflow
         if (!containsAtSymbol(inputEmail) || strlen(inputEmail) > 80 || !checkEmail(users, inputEmail)) {
-            printf("Por favor insira um email válido!\nProvavelmente, este email já foi cadastrado ou é inválido!\n");
+            printf("Por favor insira um email válido!\nEste email já foi cadastrado ou é inválido!\n");
             cademail = 0;
         } else {
             cademail = 1;
@@ -103,11 +103,12 @@ void cadUser(User *users, int atual) {
 
     strcpy(users[atual].email, inputEmail);
     strcpy(users[atual].password, inputPass);
-
+    saveUserFile(&users[atual]);
     enter(); // Adicionado para limpar o buffer após a entrada de dados
+    return users[atual];
 }
 
-void cadUserFile(User * users){
+void saveUserFile(User * users){
     FILE * arquivo = fopen("UserDB.b","ab");
     fwrite(users,sizeof(User),1,arquivo);
 }
@@ -203,19 +204,18 @@ void regMat(Disciplina * disciplina,int i) {
 
 
 void menuPrincipal(User *users, int *currentUser, int *verifadm) {
-    const int EXIT_CODE = 14323;  // Usando uma constante em vez de um número mágico
     int r;
     int m = 0;
 
-    while (m != EXIT_CODE) {
+    while (m != -1) {
         printf("Lista de matérias cadastradas: \n");
         for (int i = 0; i < MAX_DISCIPLINES; i++) {
             printf("%d - %s\n", i + 1, users[*currentUser].materia[i].nome);
         }
         printf("Digite o número da matéria para obter mais detalhes.\n");
-        printf("Caso queira fazer logoff, digite [7]\n");
-        printf("Caso queira adicionar outra matéria, digite [8]\n");
-        printf("Digite [9] para sair\n");
+        printf("Caso queira adicionar outra matéria, digite [%d]\n",MAX_DISCIPLINES+1);
+        printf("Caso queira fazer logoff, digite [%d]\n",MAX_DISCIPLINES+2);
+        printf("Digite [%d] para sair\n",MAX_DISCIPLINES+3);
         
         if (*verifadm == 1) {
             printf("Para acessar o menu de administrador digite [6373]\n");
@@ -232,24 +232,24 @@ void menuPrincipal(User *users, int *currentUser, int *verifadm) {
                     system("cls");
                     adminMenu(users);
                     break;
-                case 9:
-                    printf("Obrigado por utilizar o Programa!!\n");
-                    printf("Finalizando...\n");
-                    enter();
-                    m = EXIT_CODE;
-                    break;
-                case 8:
+                case MAX_DISCIPLINES+1:
                     printf("Digite qual matéria deseja inserir ou modificar: \n");
                     scanf("%d", &r);
                     r--;
                     system("cls");
                     regMat(&users[*currentUser].materia[r],r);
                     break;
-                case 7:
+                case MAX_DISCIPLINES+2:
                     printf("Fazendo logoff...\n");
                     enter();
-                    m = EXIT_CODE;
+                    m = -1;
                     loginRequest(users, currentUser, verifadm);
+                    break;
+                case MAX_DISCIPLINES+3:
+                    printf("Obrigado por utilizar o Programa!!\n");
+                    printf("Finalizando...\n");
+                    enter();
+                    m = -1;
                     break;
                 default:
                     printf("Opção inválida!!\n");
