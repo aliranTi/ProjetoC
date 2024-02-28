@@ -6,7 +6,7 @@ User * alocarUser(int quant){
         // Tratar falha na alocação de memória, se necessário
         return NULL;
     }
-    alocarMateria(usuario,1);
+    alocarMateria(usuario,MAX_DISCIPLINES);
     return usuario;
 }
 
@@ -17,13 +17,14 @@ void alocarMateria(User *users, int quant) {
             // Tratar falha na alocação de memória, se necessário
         }
     }
+    
 }
 
 void enter(){
     printf("\nAperte 'ENTER' para continuar\n");
     while (getchar() != '\n');      // Limpa o buffer, consumindo o '\n' anterior (se houver)
     getchar(); // Aguarda o usuario pressionar ENTER
-    system("cls");
+    // system("cls");
 }
 
 void loginRequest(User *users, int *currentUser, int *verifadm) {
@@ -256,6 +257,7 @@ void menuPrincipal(User *users, int *currentUser, int *verifadm) {
                     printf("Obrigado por utilizar o Programa!!\n");
                     printf("Finalizando...\n");
                     enter();
+                    saveUserFile(&users[*currentUser]);
                     m = -1;
                     break;
                 default:
@@ -275,7 +277,7 @@ void preListMat(User *users, int *currentUser, int *atualMat) {
         listMat(users, currentUser, atualMat);
         printf("Selecione uma opção \n");
         printf("[1] para inserir notas\n");
-        printf("[2] para Imprimir a materia atual");
+        printf("[2] para Imprimir a materia atual\n");
         printf("[3] para sair\n");
         scanf("%d", &h);
 
@@ -294,7 +296,7 @@ void preListMat(User *users, int *currentUser, int *atualMat) {
                 enter();
                 break;
         }
-    } while (h != 2);  
+    } while (h != 3);  
 }
 
 
@@ -315,7 +317,7 @@ void cadNota(User *users, int *currentUser, int *atualMat) {
     int l = 0;
 
     do {
-        system("cls"); // limpa a tela
+        // system("cls"); // limpa a tela
         for (int i = 0; i < MAX_NOTES; i++) {
             printf("Nota %d: %.1f\n", i + 1, users[*currentUser].materia[*atualMat].nota[i]);
         }
@@ -485,6 +487,7 @@ void imprimirMateria(Disciplina materiaAtual){
         }
         
     }
+    fprintf(file,"\n");
     fclose(file);
 }
 
