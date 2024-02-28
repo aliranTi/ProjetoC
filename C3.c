@@ -3,7 +3,7 @@
 int main(){  
     User * users;
     int current_user, verif_adm;
-    users = alocarUser(MAX_USERS);
+    users = recuperarUsers();
     //criarUsers(users);
     loginRequest(users,&current_user,&verif_adm);
 

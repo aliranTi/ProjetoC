@@ -27,7 +27,7 @@ User *alocarUser(int quant);
 User cadUser(User *users, int atual); // cadastro de usuarios
 User *recuperarUsers();
 void testar();
-void imprimirMateria(User *users, int *currentUser, int *atualMat);
+void imprimirMateria(Disciplina materiaAtual);
 void alocarMateria(User *users, int quant);
 void enter(); // apenas para o usuario ter tempo de ler
 void loginRequest(User *users, int *currentUser, int *verifadm); // pede o login ou cadastro para o usuario

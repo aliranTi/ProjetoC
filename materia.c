@@ -2,15 +2,18 @@
 
 User * alocarUser(int quant){
     User * usuario = (User *) malloc(quant*sizeof(User));
+    if (usuario == NULL) {
+        // Tratar falha na alocação de memória, se necessário
+        return NULL;
+    }
     alocarMateria(usuario,1);
     return usuario;
 }
 
-void alocarMateria(User *users,int quant){
-    int i;
-    for(i = 0; i < MAX_USERS; i++){
-        users[i].materia = calloc(quant,sizeof(Disciplina));
-        if(users[i].materia == NULL) {
+void alocarMateria(User *users, int quant) {
+    for (int i = 0; i < MAX_USERS; i++) {
+        users[i].materia = calloc(quant, sizeof(Disciplina));
+        if (users[i].materia == NULL) {
             // Tratar falha na alocação de memória, se necessário
         }
     }
@@ -45,9 +48,9 @@ void loginRequest(User *users, int *currentUser, int *verifadm) {
                     printf("Login bem-sucedido!\n");
                     enter();
                     if (*verifadm != 1 && hasMateria(users, currentUser) == 0) {
-                        testar();
                         matInsert(users, currentUser);
                     }
+                    printf("teste");
                     menuPrincipal(users, currentUser, verifadm);
                 } else {
                     printf("Nome de usuário ou senha incorretos!\n");
@@ -59,6 +62,7 @@ void loginRequest(User *users, int *currentUser, int *verifadm) {
             if (atual <= MAX_USERS) {
                 users[atual] = cadUser(&users[atual], *atualp);
                 atual++;
+                printf("\nretornou\n");
                 loginRequest(users, currentUser, verifadm);
             } else {
                 printf("Número máximo de usuários cadastrados atingido,\npor favor contate o administrador para resolver\n");
@@ -73,15 +77,10 @@ void loginRequest(User *users, int *currentUser, int *verifadm) {
     }
 }
 
-void testar(){
-    printf("test\n");
-}
-
 User cadUser(User *users, int atual) { 
     char inputEmail[85];
     char inputPass[85];
     int cademail = 0;
-    testar();
     do {
         printf("Digite o email para realizar o cadastro: \n");
         scanf(" %84s", inputEmail); // Ajustado o tamanho máximo para 84 para evitar overflow
@@ -111,6 +110,7 @@ User cadUser(User *users, int atual) {
 void saveUserFile(User * users){
     FILE * arquivo = fopen("UserDB.b","ab");
     fwrite(users,sizeof(User),1,arquivo);
+    fclose(arquivo);
 }
 
 int loginVerif(User *users, char *email, char *password, int *currentUser, int *verifadm) {
@@ -151,12 +151,12 @@ int checkEmail(User *users,char *string){
 
 int hasMateria(User *users, int *currentUser) {
     for (int i = 0; i < MAX_DISCIPLINES; i++) {
-        if (strlen(users[*currentUser].materia[i].nome) > 0) {
-            printf("Materias ja cadastradas, partindo para o menu");
+        if (users[*currentUser].materia[i].nome[0] != '\0') {
+            printf("Materias ja cadastradas, partindo para o menu\n");
             return 1;  // Retorna 1 se encontrar alguma matéria
         }
     }
-    printf("nenhuma materia encontrada, partindo para o cadastramento");
+    printf("Nenhuma materia encontrada, partindo para o cadastramento\n");
     return 0;  // Retorna 0 se não encontrar nenhuma matéria
 }
 
@@ -164,20 +164,24 @@ void matInsert(User *users, int *currentUser) {
     int h;
 
     do {
-        printf("Deseja inserir quantas disciplinas? (Máx: %d)\n",MAX_DISCIPLINES);
+        printf("Deseja inserir quantas disciplinas? (Máx: %d)\n", MAX_DISCIPLINES);
         scanf("%d", &h);
 
         if (h < 1 || h > MAX_DISCIPLINES) {
-            printf("Por favor insira um número entre 1 e %d.\n",MAX_DISCIPLINES);
+            printf("Por favor insira um número entre 1 e %d.\n", MAX_DISCIPLINES);
         }
         enter(); // Adicionado para limpar o buffer após a entrada de dados
     } while (h < 1 || h > MAX_DISCIPLINES);
-    
-    realloc(users[*currentUser].materia,h*sizeof(struct disciplina));
 
-    
+    Disciplina *temp = realloc(users[*currentUser].materia, h * sizeof(Disciplina));
+    if (temp == NULL) {
+        // Tratar falha na alocação de memória
+    } else {
+        users[*currentUser].materia = temp;
+    }
+
     for (int i = 0; i < h; i++) {
-        regMat(&users[*currentUser].materia[i],i);
+        regMat(&users[*currentUser].materia[i], i);
     }
 }
 
@@ -208,16 +212,19 @@ void menuPrincipal(User *users, int *currentUser, int *verifadm) {
     int m = 0;
 
     while (m != -1) {
-        printf("Lista de matérias cadastradas: \n");
-        for (int i = 0; i < MAX_DISCIPLINES; i++) {
-            printf("%d - %s\n", i + 1, users[*currentUser].materia[i].nome);
+        if (!*verifadm)
+        {
+            printf("Lista de matérias cadastradas: \n");
+            for (int i = 0; i < MAX_DISCIPLINES; i++) {
+                printf("%d - %s\n", i + 1, users[*currentUser].materia[i].nome);
+            }
         }
         printf("Digite o número da matéria para obter mais detalhes.\n");
         printf("Caso queira adicionar outra matéria, digite [%d]\n",MAX_DISCIPLINES+1);
         printf("Caso queira fazer logoff, digite [%d]\n",MAX_DISCIPLINES+2);
         printf("Digite [%d] para sair\n",MAX_DISCIPLINES+3);
         
-        if (*verifadm == 1) {
+        if (*verifadm) {
             printf("Para acessar o menu de administrador digite [6373]\n");
         }
 
@@ -263,6 +270,7 @@ void menuPrincipal(User *users, int *currentUser, int *verifadm) {
 void preListMat(User *users, int *currentUser, int *atualMat) {
     int h;
     do {
+        Disciplina materia = users[*currentUser].materia[*atualMat];
         system("cls");
         listMat(users, currentUser, atualMat);
         printf("Selecione uma opção \n");
@@ -276,7 +284,7 @@ void preListMat(User *users, int *currentUser, int *atualMat) {
                 cadNota(users, currentUser, atualMat);
                 break;
             case 2:
-                imprimirMateria(users, currentUser, atualMat);
+                imprimirMateria(materia);
                 break;
             case 3:
                 enter();
@@ -459,9 +467,8 @@ User * recuperarUsers(){
     return users;
 }
 
-void imprimirMateria(User *users, int *currentUser, int *atualMat){
+void imprimirMateria(Disciplina materiaAtual){
     FILE * file = fopen("saida.txt","a");
-    Disciplina materiaAtual = users[*currentUser].materia[*atualMat];
     fprintf(file,"Nome: %s\n", materiaAtual.nome);
     fprintf(file,"Professor: %s\n", materiaAtual.prof);
     fprintf(file,"Horas totais: %.2f\n", materiaAtual.hora_t);
