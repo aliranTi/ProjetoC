@@ -4,3 +4,6 @@ testes.exe
 .vscode/launch.json
 saida.txt
 .vscode/settings.json
+*.o
+C3.o
+materia.o
