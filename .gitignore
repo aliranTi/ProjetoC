@@ -7,3 +7,5 @@ saida.txt
 *.o
 C3.o
 materia.o
+.vscode/c_cpp_properties.json
+.vscode/settings.json

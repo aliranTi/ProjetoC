@@ -1,13 +1,13 @@
 #include "libprojeto.h"
 
 int main(){  
-    User ** users;
-    int current_user, verif_adm;
-    users = recuperarUsers();
-    //criarUsers(users);
-    loginRequest(users,&current_user,&verif_adm);
 
-    liberarMateria(users);
-    free(users);
+    int verif_adm;
+    int quant_users = countUsers();
+    // users = recuperarUsers(&quant_users);
+    //criarUsers(users);
+    loginRequest(&quant_users,&verif_adm);
+
+    
     return 0;
 }
