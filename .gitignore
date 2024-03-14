@@ -1,11 +1,7 @@
 UserDB.b
-testes.exe
-.vscode/tasks.json
-.vscode/launch.json
 saida.txt
-.vscode/settings.json
 *.o
+*.exe
 C3.o
 materia.o
-.vscode/c_cpp_properties.json
-.vscode/settings.json
+.vscode/*
