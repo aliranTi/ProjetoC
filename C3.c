@@ -7,7 +7,6 @@ int main(){
     // users = recuperarUsers(&quant_users);
     //criarUsers(users);
     loginRequest(&quant_users,&verif_adm);
-
     
     return 0;
 }

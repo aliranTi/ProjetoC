@@ -162,6 +162,8 @@ char* verMedia(Disciplina * materia) {
 void menuPrincipal(User * users, int * quant_users, int *verifadm, int * quant_materias) {
     int r;
     int m = 0;
+    User * temp = recuperarUsers(quant_users);
+
 
     while (m != -1) {
         if (!*verifadm)
@@ -208,6 +210,7 @@ void menuPrincipal(User * users, int * quant_users, int *verifadm, int * quant_m
                     printf("Obrigado por utilizar o Programa!!\n");
                     printf("Salvando...\n");
                     enter();
+                    deletarUsuario(temp,*users,quant_users);
                     saveUserFile(users);
                     printf("Finalizando...\n");
                     freeUsers(users);
