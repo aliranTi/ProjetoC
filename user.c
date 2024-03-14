@@ -17,13 +17,6 @@ void alocarMateria(User *users, int quant) {
     }
 }
 
-void enter(){
-    printf("\nAperte 'ENTER' para continuar\n");
-    while (getchar() != '\n');      // Limpa o buffer, consumindo o '\n' anterior (se houver)
-    getchar(); // Aguarda o usuario pressionar ENTER
-    // system("cls");
-}
-
 int containsAtSymbol(char *string){ 
     return strchr(string, '@') != NULL;  
     // Retorna 1 (verdadeiro) se '@' estiver na string, caso contrario retorna 0 (falso)
@@ -137,12 +130,16 @@ User * checkUser(char * email, char * password, User * users){
 User * loginVerif(char *email, char *password, int *verifadm, int * quant_users) {
     User * users = recuperarUsers(quant_users);
     User * temp;
-    const char login_adm[] = "admin";
-    const char senha_adm[] = "admin123";
-    if (strcmp(email, login_adm) == 0 && strcmp(password, senha_adm) == 0) {
+    User * admin;
+    admin->matricula = -1;
+    strcpy(admin->email,"admin");
+    strcpy(admin->password, "admin123");
+    admin->materia = NULL;
+
+    if (strcmp(email, admin->email) == 0 && strcmp(password, admin->password) == 0) {
         *verifadm = 1;
         // *currentUser = quant_users + 1;
-        return 1;
+        return admin;
     } else {
     for (int i = 0; i < *quant_users; i++) {
         temp = checkUser(email,password,&users[i]);
@@ -156,6 +153,30 @@ User * loginVerif(char *email, char *password, int *verifadm, int * quant_users)
     }
     free(users);
     return NULL; // Retorna 0 se o login falhar
+}
+
+void deletarUsuario(User * users,User userExcluido,int * quant_users){
+    int i;
+    FILE * arquivo = fopen("UserDB.b","wb");
+    for (i = 0; i < *quant_users; i++)
+    {
+        if (users[i].matricula != userExcluido.matricula)
+        {
+            fwrite(&users[i],sizeof(User),1,arquivo);
+        }
+    }
+    fclose(arquivo);
+}
+
+void saveUserFile(User * users){
+    FILE * arquivo = fopen("UserDB.b","ab");
+    fwrite(users,sizeof(User),1,arquivo);
+    fclose(arquivo);
+}
+
+void freeUsers(User * users){
+    free(users->materia);
+    free(users);
 }
 
 void loginRequest(int * quant_users, int *verifadm) {
@@ -185,7 +206,7 @@ void loginRequest(int * quant_users, int *verifadm) {
                     if (*verifadm != 1 && !hasMateria(users)) {
                         matInsert(users, &quant_materias);
                     }
-                    menuPrincipal(users, quant_users, verifadm, quant_materias);
+                    menuPrincipal(users, quant_users, verifadm, &quant_materias);
                 } else {
                     printf("Nome de usuário ou senha incorretos!\n");
                 }

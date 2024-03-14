@@ -1,5 +1,12 @@
 #include "libprojeto.h"
 
+void enter() {
+    printf("\nAperte 'ENTER' para continuar\n");
+    while (getchar() != '\n');      // Limpa o buffer, consumindo o '\n' anterior (se houver)
+    getchar(); // Aguarda o usuario pressionar ENTER
+    // system("cls");
+}
+
 int hasMateria(User *users) {
     for (int i = 0; i < MAX_DISCIPLINES; i++) {
         if (users->materia[i].nome[0] != '\0') {
@@ -17,11 +24,11 @@ void matInsert(User *users, int * h) {
         printf("Deseja inserir quantas disciplinas? (Máx: %d)\n", MAX_DISCIPLINES);
         scanf("%d", &h);
 
-        if (h < 1 || h > MAX_DISCIPLINES) {
+        if (*h < 1 || *h > MAX_DISCIPLINES) {
             printf("Por favor insira um número entre 1 e %d.\n", MAX_DISCIPLINES);
         }
         enter(); // Adicionado para limpar o buffer após a entrada de dados
-    } while (h < 1 || h > MAX_DISCIPLINES);
+    } while (*h < 1 || *h > MAX_DISCIPLINES);
 
     realloc(users->materia, *h * sizeof(Disciplina));
     
@@ -33,7 +40,7 @@ void matInsert(User *users, int * h) {
         users->materia = temp;
     }
 
-    for (int i = 0; i < h; i++) {
+    for (int i = 0; i < *h; i++) {
         regMat(&users->materia[i], i);
     }
 }
@@ -116,7 +123,7 @@ void cadNota(Disciplina * materia) {
     } while (l != 4);
 }
 
-void listMat(Disciplina * materia){
+void listMat(Disciplina * materia) {
     printf("Nome: %s\n", materia->nome);
     printf("Professor: %s\n", materia->prof);
     printf("Horas totais: %.2f\n", materia->hora_t);
@@ -222,7 +229,7 @@ void menuPrincipal(User * users, int * quant_users, int *verifadm, int * quant_m
     }
 }
 
-void imprimirMateria(Disciplina materiaAtual){
+void imprimirMateria(Disciplina materiaAtual) {
     FILE * file = fopen("saida.txt","a");
     fprintf(file,"Nome: %s\n", materiaAtual.nome);
     fprintf(file,"Professor: %s\n", materiaAtual.prof);
@@ -244,3 +251,57 @@ void imprimirMateria(Disciplina materiaAtual){
     fclose(file);
 }
 
+void adminMenu(int * quant_users) {
+    int escolhaMenu;
+    int escolhaUser;
+    int confirmacao;
+    User * users = recuperarUsers(quant_users);
+
+    User * temp;
+
+    printf("Código de administrador encontrado\n");
+
+    do {
+        printf("O que deseja?\n");
+        printf("[1] Excluir usuário.\n");
+        printf("[0] Sair\n");
+        scanf("%d", &escolhaMenu);
+
+        switch (escolhaMenu) {
+            
+            case 1:
+                for (int i = 0; i < *quant_users; i++) {
+                    printf("Usuário %d de matricula: %d e email: %s\n", i + 1,users[i].matricula, users[i].email);
+                }
+                printf("Ótimo! Qual usuário deseja excluir?\n");
+                scanf("%d", &escolhaUser);
+                
+                if (escolhaUser < 1 || escolhaUser > *quant_users) {
+                    printf("Número de usuário inválido!\n");
+                    break;
+                }
+
+                printf("Certeza que deseja excluir o usuário %d? \nDigite o número novamente para confirmar: ", escolhaUser);
+                scanf("%d", &confirmacao);
+                *temp = users[escolhaUser - 1];
+                if (escolhaUser == confirmacao) {
+                    printf("Deletando o usuario %d de matricula: %d e email: %s\n", escolhaUser,users[escolhaUser - 1].matricula, users[escolhaUser - 1].email);
+                    deletarUsuario(users,*temp,quant_users);
+                    printf("Deletado com sucesso!\n");
+                    enter();
+                } else {
+                    printf("A confirmação difere do número escolhido, voltando ao menu principal\n");
+                    enter();
+                }
+                break;
+
+            case 0:
+                break;
+
+            default:
+                printf("Opção inválida!\n");
+                enter();
+                break;
+        }
+    } while (escolhaMenu != 0);
+}
