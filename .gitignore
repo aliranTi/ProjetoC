@@ -2,6 +2,4 @@ UserDB.b
 saida.txt
 *.o
 *.exe
-C3.o
-materia.o
 .vscode/*

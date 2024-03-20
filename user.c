@@ -66,8 +66,8 @@ int checkEmail(User * users,char *string, int * quant_users){
 }
 
 void freeUser(User * user){
-    free(user->materia);
-    free(user);
+    // free(user->materia);
+    // free(user);
 }
 
 void cadUser(int * quant_users) { 
@@ -80,7 +80,7 @@ void cadUser(int * quant_users) {
     do {
         printf("Digite o email para realizar o cadastro: \n");
         scanf(" %84s", inputEmail); // Ajustado o tamanho máximo para 84 para evitar overflow
-        if (!containsAtSymbol(inputEmail) || strlen(inputEmail) > 80 || !checkEmail(usersCheck, inputEmail, quant_users)) {
+        if (!containsAtSymbol(inputEmail) || strlen(inputEmail) > 80 || checkEmail(usersCheck, inputEmail, quant_users)) {
             printf("Por favor insira um email válido!\nEste email já foi cadastrado ou é inválido!\n");
             cadEmail = 0;
         } else {
@@ -100,19 +100,20 @@ void cadUser(int * quant_users) {
     do
     {
         scanf("%d",&inputMat);
-        cadMat = checkMat(users,inputMat, quant_users);
+        cadMat = checkMat(usersCheck,inputMat, quant_users);
         if (cadMat)
         {
             printf("Essa matricula ja foi cadastrada!\ninsira uma matricula diferente: \n");
         }
         
-    } while (!cadMat);
+    } while (cadMat);
     
 
     freeUser(usersCheck);
     users->matricula = inputMat;
     strcpy(users->email, inputEmail);
     strcpy(users->password, inputPass);
+    users->materia = NULL;
     saveUserFile(users);
     enter(); // Adicionado para limpar o buffer após a entrada de dados
 }
@@ -143,7 +144,7 @@ User * loginVerif(char *email, char *password, int *verifadm, int * quant_users)
     } else {
     for (int i = 0; i < *quant_users; i++) {
         temp = checkUser(email,password,&users[i]);
-        if (temp != NULL) {
+        if (strcmp(temp->email, email) == 0 && strcmp(temp->password, password) == 0) {
             // *currentUser = i; // Define o usuário atual após o login bem-sucedido
             
             *verifadm = 0;    // reseta a tag adm
@@ -175,15 +176,14 @@ void saveUserFile(User * users){
 }
 
 void freeUsers(User * users){
-    free(users->materia);
-    free(users);
+    // free(users->materia);
+    // free(users);
 }
 
 void loginRequest(int * quant_users, int *verifadm) {
     char inputUsername[50];
     char inputPassword[50];
     int escolha;
-    static int atual = 0;
     User * temp;
     User * users;
     int quant_materias;
@@ -215,6 +215,7 @@ void loginRequest(int * quant_users, int *verifadm) {
 
         case 2:
             cadUser(quant_users);
+            printf("Usuario cadastrado com sucesso!!\n");
             loginRequest(quant_users,verifadm);
             break;
 
