@@ -8,21 +8,22 @@ void enter() {
 }
 
 int hasMateria(User *users) {
-    for (int i = 0; i < MAX_DISCIPLINES; i++) {
-        if (users->materia[i].nome[0] != '\0') {
-            printf("Materias ja cadastradas, partindo para o menu\n");
-            return 1;  // Retorna 1 se encontrar alguma matéria
-        }
-    }
+    // for (int i = 0; i < MAX_DISCIPLINES; i++) {
+    //     if (users->materia[i].nome[0] != '\0') {
+    //         printf("Materias ja cadastradas, partindo para o menu\n");
+    //         return 1;  // Retorna 1 se encontrar alguma matéria
+    //     }
+    // }
+    if(users->materia != NULL) return 1;
     printf("Nenhuma materia encontrada, partindo para o cadastramento\n");
     return 0;  // Retorna 0 se não encontrar nenhuma matéria
 }
 
-void matInsert(User *users, int * h) {
+void matInsert(User *users, unsigned int * h) {
 
     do {
         printf("Deseja inserir quantas disciplinas? (Máx: %d)\n", MAX_DISCIPLINES);
-        scanf("%d", &h);
+        scanf("%u", h);
 
         if (*h < 1 || *h > MAX_DISCIPLINES) {
             printf("Por favor insira um número entre 1 e %d.\n", MAX_DISCIPLINES);
@@ -30,22 +31,20 @@ void matInsert(User *users, int * h) {
         enter(); // Adicionado para limpar o buffer após a entrada de dados
     } while (*h < 1 || *h > MAX_DISCIPLINES);
 
-    realloc(users->materia, *h * sizeof(Disciplina));
-    
-    Disciplina *temp = users->materia;
-
-    if (temp == NULL) {
+    users->materia = (Disciplina*) calloc(*h,sizeof(struct disciplina));
+    if (users->materia == NULL) {
         // Tratar falha na alocação de memória
     } else {
-        users->materia = temp;
+        for (unsigned int i = 0; i < *h; i++) {
+            users->materia[i] = regMat(i);
+            printf("materia cadastrada!\n");
+        }
     }
-
-    for (int i = 0; i < *h; i++) {
-        regMat(&users->materia[i], i);
-    }
+    printf("Terminado o cadastro de disciplinas, vamos para o menu principal!\n");
 }
 
-void regMat(Disciplina * disciplina,int i) {
+Disciplina regMat(unsigned int i) {
+    Disciplina * disciplina = malloc(sizeof(struct disciplina));
     printf("---------------------------------------\n");
     printf("--------Registro de disciplinas--------\n");
     printf("---------------------------------------\n");
@@ -63,6 +62,7 @@ void regMat(Disciplina * disciplina,int i) {
     disciplina->hora_c = (disciplina->hora_c * 5) / 6;
     printf("Disciplina cadastrada com sucesso!\n");
     enter();
+    return *disciplina;
 }
 
 void preListMat(Disciplina * materia) {
@@ -159,7 +159,7 @@ char* verMedia(Disciplina * materia) {
     }
 }
 
-void menuPrincipal(User * users, int * quant_users, int *verifadm, int * quant_materias) {
+void menuPrincipal(User * users, unsigned int * quant_users, int *verifadm, unsigned int * quant_materias) {
     int r;
     int m = 0;
     User * temp = recuperarUsers(quant_users);
@@ -169,7 +169,7 @@ void menuPrincipal(User * users, int * quant_users, int *verifadm, int * quant_m
         if (!*verifadm)
         {
             printf("Lista de matérias cadastradas: \n");
-            for (int i = 0; i < *quant_materias; i++) {
+            for (unsigned int i = 0; i < *quant_materias; i++) {
                 printf("%d - %s\n", i + 1, users->materia[i].nome);
             }
         }
@@ -191,14 +191,14 @@ void menuPrincipal(User * users, int * quant_users, int *verifadm, int * quant_m
             switch (r) {
                 case 6373:
                     system("cls");
-                    adminMenu(users);
+                    adminMenu(quant_users);
                     break;
                 case MAX_DISCIPLINES+1:
                     printf("Digite qual matéria deseja inserir ou modificar: \n");
                     scanf("%d", &r);
                     r--;
                     system("cls");
-                    regMat(&users->materia[r],r);
+                    users->materia[r] = regMat((unsigned)r);
                     break;
                 case MAX_DISCIPLINES+2:
                     printf("Fazendo logoff...\n");
@@ -254,13 +254,13 @@ void imprimirMateria(Disciplina materiaAtual) {
     fclose(file);
 }
 
-void adminMenu(int * quant_users) {
+void adminMenu(unsigned int * quant_users) {
     int escolhaMenu;
     int escolhaUser;
     int confirmacao;
     User * users = recuperarUsers(quant_users);
 
-    User * temp;
+    User * temp = &users[0];
 
     printf("Código de administrador encontrado\n");
 
@@ -273,13 +273,13 @@ void adminMenu(int * quant_users) {
         switch (escolhaMenu) {
             
             case 1:
-                for (int i = 0; i < *quant_users; i++) {
+                for (int i = 0; i < (int)*quant_users; i++) {
                     printf("Usuário %d de matricula: %d e email: %s\n", i + 1,users[i].matricula, users[i].email);
                 }
                 printf("Ótimo! Qual usuário deseja excluir?\n");
                 scanf("%d", &escolhaUser);
                 
-                if (escolhaUser < 1 || escolhaUser > *quant_users) {
+                if (escolhaUser < 1 || escolhaUser > (int)*quant_users) {
                     printf("Número de usuário inválido!\n");
                     break;
                 }
