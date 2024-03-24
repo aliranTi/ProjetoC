@@ -3,7 +3,8 @@
 int main(){  
 
     int verif_adm;
-    int quant_users = countUsers();
+    checkFile();
+    unsigned int quant_users = (unsigned int)countUsers();
     // users = recuperarUsers(&quant_users);
     //criarUsers(users);
     loginRequest(&quant_users,&verif_adm);
