@@ -140,7 +140,6 @@ void cadUser(unsigned int * quant_users) {
 
 User * checkUser(char * email, char * password, User * users){
     if (strcmp(users->email, email) == 0 && strcmp(users->password, password) == 0) {
-        // *currentUser = i; // Define o usuário atual após o login bem-sucedido
         printf("usuario encontrado\n");
         return users;         // Retorna o usuario se o login for bem-sucedido
     }
@@ -158,19 +157,16 @@ User * loginVerif(char *email, char *password, int *verifadm, unsigned int * qua
 
     if (strcmp(email, admin.email) == 0 && strcmp(password, admin.password) == 0) {
         *verifadm = 1;
-        // *currentUser = quant_users + 1;
         return adminPointer;
     } else {
     for (unsigned int i = 0; i < *quant_users; i++) {
         temp = checkUser(email,password,&users[i]);
         if (temp != NULL) {
-            // *currentUser = i; // Define o usuário atual após o login bem-sucedido
             *verifadm = 0;    // reseta a tag adm
             return temp;         // Retorna 1 se o login for bem-sucedido
         }
     }
     }
-    // free(admin);
     free(users);
     return NULL; // Retorna 0 se o login falhar
 }
