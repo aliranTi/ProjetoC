@@ -8,12 +8,6 @@ void enter() {
 }
 
 int hasMateria(User *users) {
-    // for (int i = 0; i < MAX_DISCIPLINES; i++) {
-    //     if (users->materia[i].nome[0] != '\0') {
-    //         printf("Materias ja cadastradas, partindo para o menu\n");
-    //         return 1;  // Retorna 1 se encontrar alguma matéria
-    //     }
-    // }
     if(users->materia != NULL) return 1;
     printf("Nenhuma materia encontrada, partindo para o cadastramento\n");
     return 0;  // Retorna 0 se não encontrar nenhuma matéria
