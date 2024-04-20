@@ -2,12 +2,11 @@
 
 int main(){  
 
-    int verif_adm;
     checkFile();
     
     unsigned int quant_users = (unsigned int)countUsers();
 
-    loginRequest(&quant_users,&verif_adm);
+    loginRequest(&quant_users);
     
     return 0;
 }

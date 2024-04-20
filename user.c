@@ -11,8 +11,8 @@ User * alocarUser(unsigned int quant){
 }
 
 void alocarMateria(User *users, unsigned int quant) {
-    users->materia = calloc(quant, sizeof(Disciplina));
-    if (users->materia == NULL) {
+    users->materiaHead = calloc(quant, sizeof(Disciplina));
+    if (users->materiaHead == NULL) {
         // Tratar falha na alocação de memória, se necessário
     }
 }
@@ -85,7 +85,7 @@ int checkEmail(User * users,char *string, unsigned int * quant_users){
 }
 
 void freeUsers(User * user){
-    free(user->materia);
+    free(user->materiaHead);
     free(user);
 }
 
@@ -132,7 +132,7 @@ void cadUser(unsigned int * quant_users) {
     users->matricula = inputMat;
     strcpy(users->email, inputEmail);
     strcpy(users->password, inputPass);
-    users->materia = NULL;
+    users->materiaHead = NULL;
     saveUserFile(users);
     free(users);
     enter(); // Adicionado para limpar o buffer após a entrada de dados
@@ -149,23 +149,16 @@ User * checkUser(char * email, char * password, User * users){
     }
 }
 
-User * loginVerif(char *email, char *password, int *verifadm, unsigned int * quant_users) {
+User * loginVerif(char *email, char *password, unsigned int * quant_users) {
     User * users = recuperarUsers(quant_users);
     User * temp;
-    User admin = {0, "admin", "admin123", NULL};
-    User * adminPointer = &admin;
 
-    if (strcmp(email, admin.email) == 0 && strcmp(password, admin.password) == 0) {
-        *verifadm = 1;
-        return adminPointer;
-    } else {
+    
     for (unsigned int i = 0; i < *quant_users; i++) {
         temp = checkUser(email,password,&users[i]);
         if (temp != NULL) {
-            *verifadm = 0;    // reseta a tag adm
             return temp;         // Retorna 1 se o login for bem-sucedido
         }
-    }
     }
     free(users);
     return NULL; // Retorna 0 se o login falhar
@@ -196,7 +189,7 @@ void saveUserFile(User * users){
     fclose(arquivo);
 }
 
-void loginRequest(unsigned int * quant_users, int *verifadm) {
+void loginRequest(unsigned int * quant_users) {
     char inputUsername[50];
     char inputPassword[50];
     int escolha;
@@ -213,30 +206,30 @@ void loginRequest(unsigned int * quant_users, int *verifadm) {
             scanf("%49s", inputUsername); // Lê o nome de usuário do teclado
             printf("Digite sua senha: ");
             scanf("%49s", inputPassword); // Lê a senha do teclado
-            temp = loginVerif(inputUsername, inputPassword, verifadm, quant_users);
+            temp = loginVerif(inputUsername, inputPassword, quant_users);
             if (temp != NULL) {
-                users = loginVerif(inputUsername, inputPassword, verifadm, quant_users);
+                users = loginVerif(inputUsername, inputPassword, quant_users);
                 printf("Login bem-sucedido!\n");
                 enter();
-                if (*verifadm != 1 && !hasMateria(users)) {
+                if (!hasMateria(users)) {
                     matInsert(users, &quant_materias);
                 }
-                menuPrincipal(users, quant_users, verifadm, &quant_materias);
+                menuPrincipal(users, quant_users, &quant_materias);
             } else {
                 printf("Nome de usuário ou senha incorretos!\n");
-                loginRequest(quant_users,verifadm);
+                loginRequest(quant_users);
             }
             break;
 
         case 2:
             cadUser(quant_users);
             printf("Usuario cadastrado com sucesso!!\n");
-            loginRequest(quant_users,verifadm);
+            loginRequest(quant_users);
             break;
 
         default:
             printf("Escolha inválida!!\n");
-            loginRequest(quant_users, verifadm);
+            loginRequest(quant_users);
             break;
     }
 }
