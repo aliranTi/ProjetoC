@@ -5,8 +5,10 @@
 
 
 #define MAX_DISCIPLINES 6
-#define MAX_USERS 5
 #define MAX_NOTES 3
+#define MAX_LENGHT 100
+#define DOC_SIZE 12
+
 
 struct disciplina{
     char nome[100];
@@ -18,38 +20,47 @@ struct disciplina{
 };
 
 struct user{
-    int matricula;
+    char matricula[DOC_SIZE];
     char email[85];
     char password[85];
     struct disciplina *materiaHead;
+    struct user * proxUser;
 };
 
 typedef struct user User;
 typedef struct disciplina Disciplina;
 
-int hasMateria(User *users);
-void matInsert(User *users, unsigned int * h);
-Disciplina regMat(unsigned int i);
+void freeMat(Disciplina *materia);
+int checarMateria(Disciplina * materia, char * string);
+Disciplina * alocarMateria();
+Disciplina *buscaBinariaDisciplina(Disciplina *head, const char *nome);
+void menuPrincipal(User * users);
+int hasMateria(Disciplina * disciplina);
+void matInsert(Disciplina ** materia);
+void regMat(Disciplina * disciplina);
 void preListMat(Disciplina * materia);
 void cadNota(Disciplina * materia);
 void listMat(Disciplina * materia);
 char* verMedia(Disciplina * materia);
-void menuPrincipal(User * users, unsigned int * quant_users, unsigned int * quant_materias);
 void imprimirMateria(Disciplina materiaAtual);
-User * alocarUser(unsigned int quant);
-void alocarMateria(User *users, unsigned int quant);
-void enter();
-void checkFile();
-int containsAtSymbol(char *string);
-void freeUsers(User * users);
-void saveUserFile(User * users);
-int countUsers();
-User * recuperarUsers(unsigned int * quant_users);
-int checkMat(User *users,int matInput, unsigned int * quant_users);
-int checkEmail(User * users,char *string, unsigned int * quant_users);
-void cadUser(unsigned int * quant_users);
+void loginRequest();
+void deletarUsuario(User * users,char * matricula);
+User * loginVerif(char *email, char *password);
 User * checkUser(char * email, char * password, User * users);
-User * loginVerif(char *email, char *password, unsigned int * quant_users);
-void loginRequest(unsigned int * quant_users);
-void adminMenu(unsigned int * quant_users);
-void deletarUsuario(User * users,User userExcluido, unsigned int * quant_users);
+void cadUser();
+int checkEmail(User * users,char *string);
+int checkMat(User *users,char * matInput);
+User * recuperarUsers();
+void freeUsers(User *user);
+void iniciaListaMateria(User *user);
+User * alocarUser();
+int containsAtSymbol(char *string);
+void erroArquivo();
+char *passaMaiuscula(char * palavra);
+int verificaCaracteresEspeciais(char *string);
+int verificaNumero(char *string);
+int checkName(char * string);
+int countUsers();
+void checkFile();
+void enter();
+void saveUserFile(User * users);

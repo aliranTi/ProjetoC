@@ -4,9 +4,7 @@ int main(){
 
     checkFile();
     
-    unsigned int quant_users = (unsigned int)countUsers();
-
-    loginRequest(&quant_users);
+    loginRequest();
     
     return 0;
 }

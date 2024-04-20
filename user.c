@@ -1,105 +1,114 @@
 #include "libprojeto.h"
 
-User * alocarUser(unsigned int quant){
-    User * usuario = (User *) malloc(quant*sizeof(User));
+User * alocarUser() {
+    User *usuario = (User *)malloc(sizeof(User));
     if (usuario == NULL) {
         // Tratar falha na alocação de memória, se necessário
         return NULL;
     }
-    alocarMateria(usuario,MAX_DISCIPLINES);
+    iniciaListaMateria(usuario);
+    usuario->proxUser = NULL;
     return usuario;
 }
 
-void alocarMateria(User *users, unsigned int quant) {
-    users->materiaHead = calloc(quant, sizeof(Disciplina));
-    if (users->materiaHead == NULL) {
+void iniciaListaMateria(User *user) {
+    Disciplina *materia = (Disciplina *) malloc(sizeof(Disciplina));
+    if (materia == NULL) {
         // Tratar falha na alocação de memória, se necessário
+        return;
+    }
+    user->materiaHead = materia;
+}
+
+void freeUser(User *user) {
+    if (user != NULL){
+    Disciplina *temp = user->materiaHead;
+    while (temp != NULL) {
+        Disciplina *next = temp->prox;
+        free(temp);
+        temp = next;
+    }
+    free(user);
     }
 }
 
-int containsAtSymbol(char *string){ 
-    return strchr(string, '@') != NULL;  
-    // Retorna 1 (verdadeiro) se '@' estiver na string, caso contrario retorna 0 (falso)
-}
-
-void erroArquivo(){
-    printf("erro no arquivo!\n");
-    exit(1);
-}
-
-int countUsers(){
-    FILE * arquivo = fopen("UserDB.b","rb");
-    if (arquivo == NULL){
-        erroArquivo();
+void freeUsers(User *user) {
+    Disciplina *temp = user->materiaHead;
+    while (temp != NULL) {
+        Disciplina *next = temp->prox;
+        free(temp);
+        temp = next;
     }
-    int quant=0;
-    User userAtual;
-    while (fread(&userAtual,sizeof(User),1,arquivo)) {
-        quant++;
-    }
-    fclose(arquivo);
-    return quant;
+    printf("free");
+    free(user);
 }
 
-User * recuperarUsers(unsigned int * quant_users){
-    User * users;
-    FILE * arquivo = fopen("UserDB.b","rb");
+User * recuperarUsers() {
+    FILE *arquivo = fopen("UserDB.b", "rb");
     if (arquivo == NULL) {
         erroArquivo();
         return NULL;
     }
-    users = alocarUser(*quant_users);
-    rewind(arquivo);
-    fread(users,sizeof(User),*quant_users,arquivo);
+    User *head = NULL;
+    User *temp = NULL;
+    User *newUser = NULL;
+    while (1) {
+        newUser = alocarUser();
+        if (newUser == NULL) {
+            // Tratar falha na alocação de memória, se necessário
+            break;
+        }
+
+        if (fread(newUser, sizeof(User), 1, arquivo) != 1) {
+            // Se não conseguir ler um usuário, sai do loop
+            free(newUser);
+            break;
+        }
+
+        if (head == NULL) {
+            head = newUser;
+        } else {
+            temp->proxUser = newUser;
+        }
+        temp = newUser;
+    }
     fclose(arquivo);
-    return users;
+    return head;
 }
 
-int checkMat(User *users,int matInput, unsigned int * quant_users){ 
-    for (unsigned int i = 0; i < *quant_users; i++) {
-        if (matInput == users[i].matricula) {
+int checkMat(User *users,char * matInput){ 
+    User * aux = users;
+    for (aux = users;aux != NULL;aux = aux->proxUser) {
+        if (strcmp(matInput,aux->matricula)) {
             return 1; //retorna 1 quando as matriculas forem iguais
         } 
     }
     return 0; //retorna 0 se nao encontrar uma matricula igual
 }
 
-void checkFile(){
-    FILE * arquivo = fopen("UserDB.b","rb");
-    
-    if (arquivo == NULL) {
-        printf("Arquivo Invalido!\nRecriando...\n");
-        fclose(arquivo);
-        arquivo = fopen("UserDB.b","wb");
-    }
-    fclose(arquivo);
-}
-
-int checkEmail(User * users,char *string, unsigned int * quant_users){ 
-    for (unsigned int i = 0; i < *quant_users; i++) {
-        if (strcmp(string,users[i].email)) {
+int checkEmail(User * users,char *string){ 
+    User * aux = users;
+    for (aux = users;aux != NULL;aux = aux->proxUser) {
+        if (strcmp(string,aux->email)) {
             return 1; //retorna 1 quando os emails forem iguais
         } 
     }
     return 0; //retorna 0 se nao encontrar um email igual
 }
 
-void freeUsers(User * user){
-    free(user->materiaHead);
-    free(user);
-}
-
-void cadUser(unsigned int * quant_users) { 
+void cadUser() {
     char inputEmail[85];
     char inputPass[85];
-    int inputMat;
-    int cadEmail = 0,cadMat = 0;
-    User * users = alocarUser(1);
-    User * usersCheck = recuperarUsers(quant_users);
+    char inputMat[DOC_SIZE];
+    int cadEmail = 0, cadMat = 0;
+    User *users = alocarUser();
+    User *usersCheck = recuperarUsers();
+
+
     do {
-        printf("Digite o email para realizar o cadastro: \n");
+        printf("Digite o email para realizar o cadastro:\n");
         scanf(" %84s", inputEmail); // Ajustado o tamanho máximo para 84 para evitar overflow
-        if (!containsAtSymbol(inputEmail) || strlen(inputEmail) > 80 || checkEmail(usersCheck, inputEmail, quant_users)) {
+        if (!containsAtSymbol(inputEmail) || strlen(inputEmail) > 80 || checkEmail(usersCheck, inputEmail)) {
             printf("Por favor insira um email válido!\nEste email já foi cadastrado ou é inválido!\n");
             cadEmail = 0;
         } else {
@@ -108,28 +117,25 @@ void cadUser(unsigned int * quant_users) {
     } while (!cadEmail);
 
     do {
-        printf("Digite a senha: \n");
+        printf("Digite a senha:\n");
         scanf(" %84s", inputPass); // Ajustado o tamanho máximo para 84 para evitar overflow
         if (strlen(inputPass) < 8 || strlen(inputPass) > 80) {
-            printf("Insira uma senha válida! \nContendo no mínimo 8 e no máximo 80 caracteres.\n");
+            printf("Insira uma senha válida!\nContendo no mínimo 8 e no máximo 80 caracteres.\n");
         }
     } while (strlen(inputPass) < 8 || strlen(inputPass) > 80);
 
-    printf("Agora, digite sua matricula para completar o cadastro: \n");
-    do
-    {
-        scanf("%d",&inputMat);
-        cadMat = checkMat(usersCheck,inputMat, quant_users);
-        if (cadMat)
-        {
-            printf("Essa matricula ja foi cadastrada!\ninsira uma matricula diferente: \n");
+    printf("Agora, digite sua matricula para completar o cadastro:\n");
+    do {
+        scanf("%s", inputMat);
+        cadMat = checkMat(usersCheck, inputMat);
+        if (cadMat) {
+            printf("Essa matricula ja foi cadastrada!\nInsira uma matricula diferente:\n");
         }
-        
     } while (cadMat);
-    
 
     freeUsers(usersCheck);
-    users->matricula = inputMat;
+    printf("Usuario cadastrado com sucesso!\n");
+    strcpy(users->matricula,inputMat);
     strcpy(users->email, inputEmail);
     strcpy(users->password, inputPass);
     users->materiaHead = NULL;
@@ -149,13 +155,13 @@ User * checkUser(char * email, char * password, User * users){
     }
 }
 
-User * loginVerif(char *email, char *password, unsigned int * quant_users) {
-    User * users = recuperarUsers(quant_users);
+User * loginVerif(char *email, char *password) {
+    User * users = recuperarUsers();
     User * temp;
-
+    User * aux;
     
-    for (unsigned int i = 0; i < *quant_users; i++) {
-        temp = checkUser(email,password,&users[i]);
+    for (aux = users;aux != NULL;aux = aux->proxUser) {
+        temp = checkUser(email,password,users);
         if (temp != NULL) {
             return temp;         // Retorna 1 se o login for bem-sucedido
         }
@@ -164,38 +170,29 @@ User * loginVerif(char *email, char *password, unsigned int * quant_users) {
     return NULL; // Retorna 0 se o login falhar
 }
 
-void deletarUsuario(User * users,User userExcluido, unsigned int * quant_users){
-    unsigned int i;
+void deletarUsuario(User * users,char * matricula){
+
+    User * aux;
     FILE * arquivo = fopen("UserDB.b","wb");
     if(arquivo == NULL){
         erroArquivo();
     }
-    for (i = 0; i < *quant_users; i++)
+    for (aux = users;aux != NULL;aux = aux->proxUser)
     {
-        if (users[i].matricula != userExcluido.matricula)
+        if (strcmp(aux->matricula,matricula) != 0)
         {
-            fwrite(&users[i],sizeof(User),1,arquivo);
+            fwrite(aux,sizeof(User),1,arquivo);
         }
     }
     fclose(arquivo);
 }
 
-void saveUserFile(User * users){
-    FILE * arquivo = fopen("UserDB.b","ab");
-    if (arquivo == NULL){
-        erroArquivo();
-    }
-    fwrite(users,sizeof(User),1,arquivo);
-    fclose(arquivo);
-}
-
-void loginRequest(unsigned int * quant_users) {
+void loginRequest() {
     char inputUsername[50];
     char inputPassword[50];
     int escolha;
     User * temp;
     User * users;
-    unsigned int quant_materias;
 
     printf("Deseja fazer login ou cadastrar? \n[1] Para login \n[2] Para cadastro\n");
     scanf("%d", &escolha);
@@ -206,30 +203,31 @@ void loginRequest(unsigned int * quant_users) {
             scanf("%49s", inputUsername); // Lê o nome de usuário do teclado
             printf("Digite sua senha: ");
             scanf("%49s", inputPassword); // Lê a senha do teclado
-            temp = loginVerif(inputUsername, inputPassword, quant_users);
+            temp = loginVerif(inputUsername, inputPassword);
             if (temp != NULL) {
-                users = loginVerif(inputUsername, inputPassword, quant_users);
+                users = temp;
                 printf("Login bem-sucedido!\n");
                 enter();
-                if (!hasMateria(users)) {
-                    matInsert(users, &quant_materias);
+                if (!hasMateria(users->materiaHead)) {
+                    matInsert(&users->materiaHead);
                 }
-                menuPrincipal(users, quant_users, &quant_materias);
+                menuPrincipal(users);
             } else {
                 printf("Nome de usuário ou senha incorretos!\n");
-                loginRequest(quant_users);
+                enter();
+                loginRequest();
             }
             break;
 
         case 2:
-            cadUser(quant_users);
+            cadUser();
             printf("Usuario cadastrado com sucesso!!\n");
-            loginRequest(quant_users);
+            loginRequest();
             break;
 
         default:
             printf("Escolha inválida!!\n");
-            loginRequest(quant_users);
+            loginRequest();
             break;
     }
 }
