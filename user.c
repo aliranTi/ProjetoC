@@ -17,6 +17,7 @@ void iniciaListaMateria(User *user) {
         // Tratar falha na alocação de memória, se necessário
         return;
     }
+    materia->prox = NULL
     user->materiaHead = materia;
 }
 
