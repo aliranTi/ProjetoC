@@ -11,6 +11,33 @@ User * alocarUser() {
     return usuario;
 }
 
+void saveUserFile(User * users){
+    FILE * arquivo = fopen("UserDB.b","ab");
+    if (arquivo == NULL){
+        erroArquivo();
+    }
+    fwrite(users,sizeof(User),1,arquivo);
+    Disciplina * temp = users->materiaHead;
+    for (temp = users->materiaHead; temp != NULL; temp = temp->prox){
+        saveDisciplinaFile(temp);
+    }
+    fclose(arquivo);
+}
+
+int countUsers(){
+    FILE * arquivo = fopen("UserDB.b","rb");
+    if (arquivo == NULL){
+        erroArquivo();
+    }
+    int quant=0;
+    User aux;
+    while (fread(&aux,sizeof(User),1,arquivo)) {
+        quant++;
+    }
+    fclose(arquivo);
+    return quant;
+}
+
 void freeUsers(User *user) {
     if (user != NULL){
     Disciplina *temp = user->materiaHead;
@@ -20,6 +47,81 @@ void freeUsers(User *user) {
         temp = next;
     }
     free(user);
+    }
+}
+
+void menuPrincipal(User * users) {
+    char r;
+    int m = 0,i = 0;
+    User * temp = recuperarUsers();
+    Disciplina * cont;
+
+    while (m != -1) {
+        printf("Lista de matérias cadastradas: \n");
+        i = 0;
+        cont = users->materiaHead;
+        while(cont!=NULL){
+            printf("%d - %s\n", i + 1, cont->nome);
+            i++;
+            cont = cont->prox;
+        }
+        printf("========================================================\n");
+        printf("== Para acessar uma materia, digite 1 \t\t==\n");
+        printf("== Para modificar uma materia, digite 2 \t\t==\n");
+        printf("== Para excluir uma materia, digite 3   \t\t==\n");
+        printf("== Para inserir uma materia, digite 4   \t\t==\n");
+        printf("== Para sair, digite 5   \t\t==\n");
+        printf("== Para encerrar o programa, digite 6   \t\t==\n");
+        printf("== Para imprimir as disciplinas, digite 7 \t\t==\n");
+        printf("========================================================\n");
+
+        scanf("%c", &r);
+        if (verificaNumero(&r)){
+            switch (r) {
+                case '1':
+                    acessarMateria(users->materiaHead);
+                    break;
+                case '2':
+                    editarMateria(users->materiaHead);
+                    break;
+                case '3':
+                    deletarMateria(&users->materiaHead);
+                    break;
+                case '4':
+                    cadDisciplina(&users->materiaHead);
+                    break;
+                case '5':
+                    printf("Fazendo logoff...\n");
+                    enter();
+                    deletarUsuario(temp,users->matricula);
+                    saveUserFile(users);
+                    m = -1;
+                    loginRequest();
+                    break;
+                case '6':
+                    printf("Obrigado por utilizar o Programa!!\n");
+                    printf("Salvando...\n");
+                    enter();
+                    deletarUsuario(temp,users->matricula);
+                    saveUserFile(users);
+                    printf("Finalizando...\n");
+                    freeUsers(users);
+                    m = -1;
+                    break;
+                case '7':
+                    printf("Imprimindo...");
+                    for(cont=users->materiaHead;cont!=NULL;cont=cont->prox){
+                        imprimirMateria(*cont);
+                    }
+                    break;
+                default:
+                    printf("Opção inválida!!\n");
+                    enter();
+                    break;
+                }
+        } else {
+            printf("Entrada Invalida!\n");
+        }
     }
 }
 

@@ -48,20 +48,6 @@ int checkName(char * string){
     return verificaNumero(string) || verificaCaracteresEspeciais(string);
 }
 
-int countUsers(){
-    FILE * arquivo = fopen("UserDB.b","rb");
-    if (arquivo == NULL){
-        erroArquivo();
-    }
-    int quant=0;
-    User aux;
-    while (fread(&aux,sizeof(User),1,arquivo)) {
-        quant++;
-    }
-    fclose(arquivo);
-    return quant;
-}
-
 void checkFile(){
     FILE * arquivo = fopen("UserDB.b","rb");
     
@@ -90,17 +76,4 @@ void enter(){
 	#elif _WIN32
 	    system("cls");
 	#endif
-}
-
-void saveUserFile(User * users){
-    FILE * arquivo = fopen("UserDB.b","ab");
-    if (arquivo == NULL){
-        erroArquivo();
-    }
-    fwrite(users,sizeof(User),1,arquivo);
-    Disciplina * temp = users->materiaHead;
-    for (temp = users->materiaHead; temp != NULL; temp = temp->prox){
-        saveDisciplinaFile(temp);
-    }
-    fclose(arquivo);
 }
