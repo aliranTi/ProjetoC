@@ -6,22 +6,12 @@ User * alocarUser() {
         // Tratar falha na alocação de memória, se necessário
         return NULL;
     }
-    iniciaListaMateria(usuario);
+    iniciaListaMateria(&usuario->materiaHead);
     usuario->proxUser = NULL;
     return usuario;
 }
 
-void iniciaListaMateria(User *user) {
-    Disciplina *materia = (Disciplina *) malloc(sizeof(Disciplina));
-    if (materia == NULL) {
-        // Tratar falha na alocação de memória, se necessário
-        return;
-    }
-    materia->prox = NULL
-    user->materiaHead = materia;
-}
-
-void freeUser(User *user) {
+void freeUsers(User *user) {
     if (user != NULL){
     Disciplina *temp = user->materiaHead;
     while (temp != NULL) {
@@ -33,20 +23,9 @@ void freeUser(User *user) {
     }
 }
 
-void freeUsers(User *user) {
-    Disciplina *temp = user->materiaHead;
-    while (temp != NULL) {
-        Disciplina *next = temp->prox;
-        free(temp);
-        temp = next;
-    }
-    printf("free");
-    free(user);
-}
-
 User * recuperarUsers() {
-    FILE *arquivo = fopen("UserDB.b", "rb");
-    if (arquivo == NULL) {
+    FILE *arquivoUser = fopen("UserDB.b", "rb");
+    if (arquivoUser == NULL) {
         erroArquivo();
         return NULL;
     }
@@ -60,12 +39,14 @@ User * recuperarUsers() {
             break;
         }
 
-        if (fread(newUser, sizeof(User), 1, arquivo) != 1) {
+        if (fread(newUser, sizeof(User), 1, arquivoUser) != 1) {
             // Se não conseguir ler um usuário, sai do loop
             free(newUser);
             break;
         }
 
+        newUser->materiaHead = recuperarDisciplina();
+        // Adicionar novo usuário à lista de usuários
         if (head == NULL) {
             head = newUser;
         } else {
@@ -73,7 +54,7 @@ User * recuperarUsers() {
         }
         temp = newUser;
     }
-    fclose(arquivo);
+    fclose(arquivoUser);
     return head;
 }
 
@@ -159,13 +140,14 @@ User * checkUser(char * email, char * password, User * users){
 User * loginVerif(char *email, char *password) {
     User * users = recuperarUsers();
     User * temp;
-    User * aux;
+    User * aux = users;
     
-    for (aux = users;aux != NULL;aux = aux->proxUser) {
+    while(aux != NULL) {
         temp = checkUser(email,password,users);
         if (temp != NULL) {
             return temp;         // Retorna 1 se o login for bem-sucedido
         }
+        aux = aux->proxUser;
     }
     free(users);
     return NULL; // Retorna 0 se o login falhar

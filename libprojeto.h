@@ -30,7 +30,9 @@ struct user{
 typedef struct user User;
 typedef struct disciplina Disciplina;
 
-void freeMat(Disciplina *materia);
+int existeDisciplina(Disciplina *materia, const char *nomeDisciplina);
+Disciplina * recuperarDisciplina();
+void saveDisciplinaFile(Disciplina *materia);
 int checarMateria(Disciplina * materia, char * string);
 Disciplina * alocarMateria();
 Disciplina *buscaBinariaDisciplina(Disciplina *head, const char *nome);
@@ -52,7 +54,7 @@ int checkEmail(User * users,char *string);
 int checkMat(User *users,char * matInput);
 User * recuperarUsers();
 void freeUsers(User *user);
-void iniciaListaMateria(User *user);
+void iniciaListaMateria(Disciplina ** materia);
 User * alocarUser();
 int containsAtSymbol(char *string);
 void erroArquivo();

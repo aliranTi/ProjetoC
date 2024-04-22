@@ -10,7 +10,6 @@ void erroArquivo(){
     exit(1);
 }
 
-
 char *passaMaiuscula(char *palavra) {
     int i;
     for (i = 0; (unsigned)i < strlen(palavra); i++) {
@@ -72,6 +71,14 @@ void checkFile(){
         arquivo = fopen("UserDB.b","wb");
     }
     fclose(arquivo);
+    arquivo = fopen("DiscDB.b","rb");
+    
+    if (arquivo == NULL) {
+        printf("Arquivo Invalido!\nRecriando...\n");
+        fclose(arquivo);
+        arquivo = fopen("DiscDB.b","wb");
+    }
+    fclose(arquivo);
 }
 
 void enter(){
@@ -91,5 +98,9 @@ void saveUserFile(User * users){
         erroArquivo();
     }
     fwrite(users,sizeof(User),1,arquivo);
+    Disciplina * temp = users->materiaHead;
+    for (temp = users->materiaHead; temp != NULL; temp = temp->prox){
+        saveDisciplinaFile(temp);
+    }
     fclose(arquivo);
 }

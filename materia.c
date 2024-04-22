@@ -34,6 +34,61 @@ Disciplina *buscaBinariaDisciplina(Disciplina *head, const char *nome) {
     return NULL; // Disciplina não encontrada
 }
 
+void saveDisciplinaFile(Disciplina *materia){
+    FILE * arquivo = fopen("DiscDB.b","ab");
+    if (arquivo == NULL){
+        erroArquivo();
+    }
+    fwrite(materia,sizeof(Disciplina),1,arquivo);
+    fclose(arquivo);
+}
+
+Disciplina * recuperarDisciplina(){
+    FILE *arquivoDisc = fopen("DiscDB.b", "rb");
+    if (arquivoDisc == NULL) {
+        erroArquivo();
+        return NULL;
+    }
+    // Ler e reconstruir a lista de disciplinas de cada usuário
+    Disciplina *materiaHead = NULL;
+    Disciplina *tempDisciplina = NULL;
+    while (1) {
+        Disciplina *novaDisciplina = (Disciplina *)malloc(sizeof(Disciplina));
+        if (novaDisciplina == NULL) {
+            // Tratar falha na alocação de memória, se necessário
+            break;
+        }
+        if (fread(novaDisciplina, sizeof(Disciplina), 1, arquivoDisc) != 1) {
+            // Se não conseguir ler uma disciplina, sai do loop
+            free(novaDisciplina);
+            break;
+        }
+        if(existeDisciplina(materiaHead, novaDisciplina->nome)){
+            free(novaDisciplina);
+            continue;
+        }
+        // Adicionar nova disciplina à lista do usuário
+        if (materiaHead == NULL) {
+            materiaHead = novaDisciplina;
+        } else {
+            tempDisciplina->prox = novaDisciplina;
+        }
+        tempDisciplina = novaDisciplina;
+    }
+    fclose(arquivoDisc);
+    return materiaHead;
+}
+
+void iniciaListaMateria(Disciplina **materiaHead) {
+    Disciplina *materia = (Disciplina *) malloc(sizeof(Disciplina));
+    if (materia == NULL) {
+        // Tratar falha na alocação de memória, se necessário
+        return;
+    }
+    materia->prox = NULL;
+    *materiaHead = materia;
+}
+
 Disciplina * excluirMateria(Disciplina * materia,char * string){
     Disciplina * cont, * ant = NULL;
     for(cont=materia;cont!= NULL;cont=cont->prox){
@@ -55,6 +110,17 @@ Disciplina * excluirMateria(Disciplina * materia,char * string){
         return materia;
 }
 
+int existeDisciplina(Disciplina *materia, const char *nomeDisciplina) {
+    Disciplina *atual = materia;
+    while (atual != NULL) {
+        if (strcmp(atual->nome, nomeDisciplina) == 0) {
+            return 1; // A disciplina já existe na lista
+        }
+        atual = atual->prox;
+    }
+    return 0; // A disciplina não existe na lista
+}
+
 void menuPrincipal(User * users) {
     char r;
     int m = 0,i = 0;
@@ -65,9 +131,12 @@ void menuPrincipal(User * users) {
 
     while (m != -1) {
         printf("Lista de matérias cadastradas: \n");
-        for(cont=users->materiaHead;cont!=NULL;cont=cont->prox){
+        i = 0;
+        cont = users->materiaHead;
+        while(cont!=NULL){
             printf("%d - %s\n", i + 1, cont->nome);
             i++;
+            cont = cont->prox;
         }
         printf("========================================================\n");
         printf("== Para acessar uma materia, digite 1 \t\t==\n");
@@ -79,28 +148,39 @@ void menuPrincipal(User * users) {
         printf("========================================================\n");
 
         scanf("%c", &r);
-        if (verificaNumero(&r) && strlen(&r)==1){
+        if (verificaNumero(&r)){
             switch (r) {
                 case '1':
                     printf("Digite o nome da matéria deseja acessar: \n");
-                    scanf("%[^\n]", inputString);
+                    scanf(" %[^\n]", inputString);
                     if (!checkName(inputString)){
                         strcpy(inputString, passaMaiuscula(inputString));
-                        preListMat(buscaBinariaDisciplina(users->materiaHead,inputString));
+                        auxDisciplina = buscaBinariaDisciplina(users->materiaHead,inputString);
+                        if(auxDisciplina != NULL) {
+                            preListMat(auxDisciplina);
+                        } else {
+                            printf("Disciplina não encontrada!\n");
+                            enter();
+                        }
                     }
                     break;
                 case '2':
                     printf("Digite o nome da matéria deseja editar: \n");
-                    scanf("%[^\n]", inputString);
+                    scanf(" %[^\n]", inputString);
                     if (!checkName(inputString)){
                         strcpy(inputString, passaMaiuscula(inputString));
                         auxDisciplina = buscaBinariaDisciplina(users->materiaHead,inputString);
-                        regMat(auxDisciplina);
+                        if(auxDisciplina != NULL) {
+                            regMat(auxDisciplina);
+                        } else {
+                            printf("Disciplina não encontrada!\n");
+                            enter();
+                        }
                     }
                     break;
                 case '3':
-                    printf("Digite o nome da matéria deseja editar: \n");
-                    scanf("%[^\n]", inputString);
+                    printf("Digite o nome da matéria deseja excluir: \n");
+                    scanf(" %[^\n]", inputString);
                     if (!checkName(inputString)){
                         strcpy(inputString, passaMaiuscula(inputString));
                         users->materiaHead = excluirMateria(users->materiaHead,inputString);
@@ -109,6 +189,8 @@ void menuPrincipal(User * users) {
                 case '4':
                     printf("Fazendo logoff...\n");
                     enter();
+                    deletarUsuario(temp,users->matricula);
+                    saveUserFile(users);
                     m = -1;
                     loginRequest();
                     break;
@@ -158,40 +240,32 @@ void matInsert(Disciplina ** materia) {
         enter(); // Adicionado para limpar o buffer após a entrada de dados
     } while (numDisciplinas < 1 || numDisciplinas > MAX_DISCIPLINES);
     int i = 0;
-    *materia = alocarMateria();
-    if (materia == NULL) {
-        // Tratar falha na alocação de memória
-    } else {
-        for (i = 0; i < numDisciplinas; i++) {
-            Disciplina *novaDisciplina = alocarMateria();
-            if (novaDisciplina == NULL) {
-                // Tratar falha na alocação de memória
-                printf("Erro ao alocar memória para nova disciplina.\n");
-                return;
-            }
-            regMat(novaDisciplina); // Função regMat para inserir dados na nova disciplina
-
-            // Inserir a nova disciplina na posição correta na lista
-            Disciplina *atual = *materia;
-            Disciplina *anterior = NULL;
-
-            while (atual != NULL && strcmp(novaDisciplina->nome, atual->nome) > 0) {
-                anterior = atual;
-                atual = atual->prox;
-            }
-
-            if (anterior == NULL) {
-                // Inserir no início da lista
-                novaDisciplina->prox = *materia;
-                *materia = novaDisciplina;
-            } else {
-                // Inserir no meio ou no final da lista
-                anterior->prox = novaDisciplina;
-                novaDisciplina->prox = atual;
-            }
-
-            printf("Disciplina cadastrada!\n");
-    }
+    for (i = 0; i < numDisciplinas; i++) {
+        Disciplina *novaDisciplina = alocarMateria();
+        if (novaDisciplina == NULL) {
+            // Tratar falha na alocação de memória
+            printf("Erro ao alocar memória para nova disciplina.\n");
+            return;
+        }
+        regMat(novaDisciplina); // Função regMat para inserir dados na nova disciplina
+        // Inserir a nova disciplina na posição correta na lista
+        Disciplina *atual = *materia;
+        Disciplina *anterior = NULL;
+        while (atual != NULL && strcmp(novaDisciplina->nome, atual->nome) > 0) {
+            anterior = atual;
+            atual = atual->prox;
+        }
+        if (anterior == NULL) {
+            // Inserir no início da lista
+            novaDisciplina->prox = *materia;
+            *materia = novaDisciplina;
+        } else {
+            // Inserir no meio ou no final da lista
+            anterior->prox = novaDisciplina;
+            novaDisciplina->prox = atual;
+        }
+        saveDisciplinaFile(novaDisciplina);
+        printf("Disciplina cadastrada!\n");
     }
     printf("Terminado o cadastro de disciplinas, vamos para o menu principal!\n");
 }
@@ -201,10 +275,12 @@ void regMat(Disciplina * disciplina) {
     printf("--------Registro de disciplinas--------\n");
     printf("---------------------------------------\n");
     printf("---------------------------------------\n");
-    printf("Digite o nome da disciplina:");
+    printf("Digite o nome da disciplina: ");
     scanf(" %99[^\n]", disciplina->nome); // Lê até 99 caracteres ou até encontrar uma nova linha.
+    strcpy(disciplina->nome, passaMaiuscula(disciplina->nome));
     printf("Digite o nome do Professor: ");
     scanf(" %99[^\n]", disciplina->prof); // Mesmo procedimento para o nome do professor.
+    strcpy(disciplina->prof, passaMaiuscula(disciplina->prof));
     printf("Digite a quantidade de aulas totais da disciplina: ");
     scanf("%f", &disciplina->hora_t);
     disciplina->hora_t = (disciplina->hora_t * 5) / 6;
